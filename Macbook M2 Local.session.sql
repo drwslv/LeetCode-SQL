@@ -154,6 +154,7 @@ insert into World (name, continent, area, population, gdp) values ('Angola', 'Af
 SELECT name, population, area from World
     WHERE area >= 3000000 OR population >= 25000000;
 
+
 /* EXAMPLE 2: 1757. Recyclable and Low Fat Products
 
 Write a solution to find the ids of products that are both low fat and recyclable.
@@ -174,3 +175,32 @@ select * from Products;
 
 select product_id from Products
     where low_fats='Y' and recyclable='Y';
+
+
+/* EXAMPLE 3: 584. Find Customer Referree
+
+Find the names of the customer that are not referred by the customer with id = 2.
+
+Return the result table in any order.
+
+The result format is in the following example. */
+
+Create table If Not Exists Customer (id int, name varchar(25), referee_id int);
+Truncate table Customer;
+insert into Customer (id, name, referee_id) values ('1', 'Will', NULL);
+insert into Customer (id, name, referee_id) values ('2', 'Jane', NULL);
+insert into Customer (id, name, referee_id) values ('3', 'Alex', '2');
+insert into Customer (id, name, referee_id) values ('4', 'Bill', NULL);
+insert into Customer (id, name, referee_id) values ('5', 'Zack', '1');
+insert into Customer (id, name, referee_id) values ('6', 'Mark', '2');
+
+select * from Customer;
+
+select name from Customer
+where id not in (
+    select id from Customer
+    where referee_id = 2
+);
+
+
+
