@@ -1,4 +1,8 @@
 
+----------------------------------------
+-- (1) SQL Data Structure
+----------------------------------------
+
 
 -- (1.1) Schema
 
@@ -51,7 +55,9 @@ ALTER TABLE `new_schema`.`users`
     DROP COLUMN `age`;
 
 
+----------------------------------------
 -- (2.1) SELECT, INSERT, UPDATE, DELETE
+----------------------------------------
 
 CREATE TABLE `new_schema`.`users` (
   `id` INT NOT NULL AUTO_INCREMENT COMMENT 'This is the primary index',
@@ -86,7 +92,9 @@ UPDATE `new_schema`.`users`
 DELETE FROM `new_schema`.`users` WHERE `id` = 1;
 
 
+----------------------------------------
 -- (2.2) WHERE
+----------------------------------------
 
 drop table if exists new_schema.users
 
@@ -257,8 +265,9 @@ FROM
 ORDER BY 
     employee_id
 
-
+----------------------------------------
 -- (2.3) JSON
+----------------------------------------
 
 drop table if exists new_schema.users
 
@@ -335,4 +344,91 @@ set
     end;
 
 
+----------------------------------------
+-- (2.4) Auxillary SELECT
+----------------------------------------
+
+drop table if exists new_schema.users
+
+CREATE TABLE `new_schema`.`users` (
+  `id` INT NOT NULL AUTO_INCREMENT COMMENT 'This is the primary index',
+  `name` VARCHAR(45) NOT NULL DEFAULT 'N/A',
+  `age` INT NULL,
+  `height` INT NULL,
+  PRIMARY KEY (`id`)
+);
+
+INSERT INTO `new_schema`.`users` (`id`, `name`, `age`, `height`) VALUES 
+  (1, 'John', 40, 150),
+  (2, 'May', 30, 140),
+  (3, 'Tim', 25, 170),
+  (4, 'Jay', 60, 185),
+  (5, 'Maria', 30, 190),
+  (6, 'Tom', 53, 200),
+  (7, 'Carter', 40, 145);
+
+select * from new_schema.users;
+
+-- Uniqueness: DISTINCT
+
+SELECT DISTINCT age FROM `new_schema`.`users`;
+
+-- Pagination: LIMIT & OFFSET
+
+SELECT * FROM `new_schema`.`users` LIMIT 3 OFFSET 1;
+
+-- Sorting: ORDER
+
+SELECT * FROM `new_schema`.`users` ORDER BY age;
+
+SELECT * FROM `new_schema`.`users` ORDER BY age ASC;
+
+SELECT * FROM `new_schema`.`users` ORDER BY age DESC;
+
+SELECT * FROM `new_schema`.`users` ORDER BY age DESC, height DESC;
+
+-- Grouping: GROUP BY
+
+SELECT `age` FROM `new_schema`.`users` GROUP BY age;
+
+SELECT COUNT(*), `age` FROM `new_schema`.`users` GROUP BY age;
+
+SELECT COUNT(*) AS `age_count`, `age`
+FROM `new_schema`.`users`
+GROUP BY age
+ORDER BY `age_count`;
+
+
+/* EXAMPLE 6: 1148. Article Views I
+
+Write a solution to find all the authors that viewed at least one of their own articles.
+
+Return the result table sorted by id in ascending order.
+
+The result format is in the following example.
+
+*/
+
+drop table if exists Views
+
+Create table If Not Exists Views (article_id int, author_id int, viewer_id int, view_date date);
+Truncate table Views;
+insert into Views (article_id, author_id, viewer_id, view_date) values ('1', '3', '5', '2019-08-01');
+insert into Views (article_id, author_id, viewer_id, view_date) values ('1', '3', '6', '2019-08-02');
+insert into Views (article_id, author_id, viewer_id, view_date) values ('2', '7', '7', '2019-08-01');
+insert into Views (article_id, author_id, viewer_id, view_date) values ('2', '7', '6', '2019-08-02');
+insert into Views (article_id, author_id, viewer_id, view_date) values ('4', '7', '1', '2019-07-22');
+insert into Views (article_id, author_id, viewer_id, view_date) values ('3', '4', '4', '2019-07-21');
+insert into Views (article_id, author_id, viewer_id, view_date) values ('3', '4', '4', '2019-07-21');
+
+select * from Views;
+
+select distinct author_id as id from Views
+where author_id = viewer_id
+order by author_id;
+
+
+----------------------------------------
+-- (2.4) Aggregate Function
+----------------------------------------
 
