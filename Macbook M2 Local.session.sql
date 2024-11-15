@@ -81,6 +81,7 @@ UPDATE `new_schema`.`users`
     SET `name` = 'Andy', `age` = 100
     WHERE `id` = 2;
 
+
 -- DELETE
 DELETE FROM `new_schema`.`users` WHERE `id` = 1;
 
@@ -203,4 +204,56 @@ where id not in (
 );
 
 
+/* EXAMPLE 4: 1873. Calculate Special Bonus
+
+Write a solution to calculate the bonus of each employee. The bonus of an employee is 100% of their salary
+if the ID of the employee is an odd number and the employee's name does not start with the character 'M'.
+The bonus of an employee is 0 otherwise.
+
+Return the result table ordered by employee_id.
+
+The result format is in the following example. */
+
+drop table Employees
+
+Create table If Not Exists Employees (employee_id int, name varchar(30), salary int);
+Truncate table Employees;
+insert into Employees (employee_id, name, salary) values ('2', 'Meir', '3000');
+insert into Employees (employee_id, name, salary) values ('3', 'Michael', '3800');
+insert into Employees (employee_id, name, salary) values ('7', 'Addilyn', '7400');
+insert into Employees (employee_id, name, salary) values ('8', 'Juan', '6100');
+insert into Employees (employee_id, name, salary) values ('9', 'Kannon', '7700');
+
+select * from Employees;
+
+ALTER TABLE Employees
+ADD COLUMN bonus INT NULL AFTER salary;
+
+UPDATE Employees
+SET bonus = salary
+WHERE (employee_id % 2 = 1) and (name not like 'M%');
+
+UPDATE Employees
+SET bonus = 0
+Where bonus is NULL;
+
+SELECT employee_id, bonus from Employees;
+
+-- OR
+
+SELECT 
+    employee_id,
+    IF(employee_id % 2 = 1 AND name NOT REGEXP '^M', salary, 0) AS bonus 
+FROM 
+    Employees 
+ORDER BY 
+    employee_id
+
+SELECT 
+    employee_id,
+    IF(employee_id % 2 = 1 AND name NOT like 'M%', salary, 0) AS bonus 
+FROM 
+    Employees 
+ORDER BY 
+    employee_id
 
