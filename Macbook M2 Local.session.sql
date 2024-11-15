@@ -257,3 +257,82 @@ FROM
 ORDER BY 
     employee_id
 
+
+-- (2.3) JSON
+
+drop table if exists new_schema.users
+
+CREATE TABLE `new_schema`.`users` (
+  `id` INT NOT NULL AUTO_INCREMENT COMMENT 'This is the primary index',
+  `name` VARCHAR(45) NOT NULL DEFAULT 'N/A',
+  PRIMARY KEY (`id`)
+);
+
+ALTER TABLE `new_schema`.`users` ADD COLUMN `contact` JSON NULL AFTER `id`;
+
+INSERT INTO `new_schema`.`users` (`id`, `name`, `contact`) VALUES 
+  (1, 'John', JSON_OBJECT('phone', '123-456', 'address', 'New York')),
+  (2, 'May', JSON_OBJECT('phone', '888-99', 'address', 'LA')),
+  (3, 'Tim', JSON_OBJECT('phone', '1236')),
+  (4, 'Jay', JSON_OBJECT('phone', '321-6', 'address', 'Boston'));
+
+select * from new_schema.users
+
+-- JSON read
+
+SELECT `id`, JSON_EXTRACT(contact, '$.phone') AS phone
+FROM `new_schema`.`users`;
+
+SELECT `id`, JSON_UNQUOTE(JSON_EXTRACT(contact, '$.phone')) AS phone
+FROM `new_schema`.`users`;
+
+SELECT `id`, JSON_UNQUOTE(JSON_EXTRACT(contact, '$.phone')) AS phone
+FROM `new_schema`.`users`
+WHERE JSON_UNQUOTE(JSON_EXTRACT(contact, '$.phone')) like '123%';
+
+-- JSON add
+
+INSERT INTO `new_schema`.`users` (`id`, `name`, `contact`) VALUES (5, 'Harry', JSON_OBJECT('phone', '1231123', 'address', 'Miami'));
+
+-- JSON updates
+
+UPDATE `new_schema`.`users` SET `contact` = JSON_SET(contact, '$.phone', '6666', '$.phone_2', '888') WHERE `id` = 2;
+
+
+/* EXAMPLE 5. 627. Swap Salary
+
+Write a solution to swap all 'f' and 'm' values (i.e., change all 'f' values to 'm' and vice versa)
+
+with a single update statement and no intermediate temporary tables.
+
+Note that you must write a single update statement, do not write any select statement for this problem.
+
+The result format is in the following example.
+
+*/
+
+drop table if exists Salary;
+
+Create table If Not Exists Salary (id int, name varchar(100), sex char(1), salary int);
+Truncate table Salary;
+insert into Salary (id, name, sex, salary) values ('1', 'A', 'm', '2500');
+insert into Salary (id, name, sex, salary) values ('2', 'B', 'f', '1500');
+insert into Salary (id, name, sex, salary) values ('3', 'C', 'm', '5500');
+insert into Salary (id, name, sex, salary) values ('4', 'D', 'f', '500');
+
+select * from Salary;
+
+
+update Salary set sex = if(sex = 'm', 'f', 'm');
+
+-- OR
+
+update Salary
+set
+    sex = case sex
+        when 'm' then 'f'
+        else 'm'
+    end;
+
+
+
