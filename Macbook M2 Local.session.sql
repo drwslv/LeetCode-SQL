@@ -432,3 +432,94 @@ order by author_id;
 -- (2.4) Aggregate Function
 ----------------------------------------
 
+drop table if exists `new_schema`.`users`;
+
+CREATE TABLE `new_schema`.`users` (
+  `id` INT NOT NULL AUTO_INCREMENT COMMENT 'This is the primary index',
+  `name` VARCHAR(45) NOT NULL DEFAULT 'N/A',
+  `age` INT NULL,
+  `height` INT NULL,
+  PRIMARY KEY (`id`)
+);
+
+INSERT INTO `new_schema`.`users` (`id`, `name`, `age`, `height`) VALUES 
+  (1, 'John', 40, 150),
+  (2, 'May', 30, 140),
+  (3, 'Tim', 25, 180),
+  (4, 'Jay', 40, 160);
+
+select * from `new_schema`.`users`;
+
+-- Counting: COUNT
+
+SELECT COUNT(*) AS `user_count` FROM `new_schema`.`users` WHERE id > 1;
+
+-- Total: SUM
+
+SELECT SUM(`age`) AS `sum_of_user_ages` FROM `new_schema`.`users`;
+
+-- Average: AVG
+
+SELECT AVG(`height`) AS `avg_user_height` FROM `new_schema`.`users`;
+
+-- Minimum & Maximum: MIN & MAX
+
+SELECT MIN(`height`) AS `user_min` FROM `new_schema`.`users`;
+
+SELECT MAX(`height`) AS `user_max` FROM `new_schema`.`users`;
+
+-- CONCAT
+
+SELECT CONCAT(`id`, '-', `name`) AS `identification`, `age` 
+FROM `new_schema`.`users`;
+
+-- Subqueries in FROM
+
+SELECT * FROM (
+  SELECT CONCAT(`id`, '-', `name`) AS `identification`, `age` 
+  FROM `new_schema`.`users`
+) AS subquery
+WHERE `identification` LIKE '%J%';
+
+WITH CTE_Users AS (
+  SELECT CONCAT(`id`, '-', `name`) AS `identification`, `age`
+  FROM `new_schema`.`users`
+)
+SELECT * FROM CTE_Users
+WHERE `identification` LIKE '%J%';
+
+
+/* EXAMPLE 7: 1693. Daily Leads and Partners
+
+For each date_id and make_name, find the number of distinct lead_id's and distinct partner_id's.
+
+Return the result table in any order.
+
+The result format is in the following example.
+
+*/
+
+delete table if exists DailySales;
+
+Create table If Not Exists DailySales(date_id date, make_name varchar(20), lead_id int, partner_id int);
+Truncate table DailySales;
+insert into DailySales (date_id, make_name, lead_id, partner_id) values ('2020-12-8', 'toyota', '0', '1');
+insert into DailySales (date_id, make_name, lead_id, partner_id) values ('2020-12-8', 'toyota', '1', '0');
+insert into DailySales (date_id, make_name, lead_id, partner_id) values ('2020-12-8', 'toyota', '1', '2');
+insert into DailySales (date_id, make_name, lead_id, partner_id) values ('2020-12-7', 'toyota', '0', '2');
+insert into DailySales (date_id, make_name, lead_id, partner_id) values ('2020-12-7', 'toyota', '0', '1');
+insert into DailySales (date_id, make_name, lead_id, partner_id) values ('2020-12-8', 'honda', '1', '2');
+insert into DailySales (date_id, make_name, lead_id, partner_id) values ('2020-12-8', 'honda', '2', '1');
+insert into DailySales (date_id, make_name, lead_id, partner_id) values ('2020-12-7', 'honda', '0', '1');
+insert into DailySales (date_id, make_name, lead_id, partner_id) values ('2020-12-7', 'honda', '1', '2');
+insert into DailySales (date_id, make_name, lead_id, partner_id) values ('2020-12-7', 'honda', '2', '1');
+
+select * from DailySales;
+
+select date_id, make_name, count(distinct lead_id) as unique_leads, count(distinct partner_id) as unique_partners
+from DailySales
+group by date_id, make_name
+order by make_name desc;
+
+
+
