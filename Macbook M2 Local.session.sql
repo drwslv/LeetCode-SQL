@@ -573,3 +573,39 @@ from Activity
 group by player_id
 order by player_id asc;
 
+
+/* EXAMPLE 10: 182. Duplicate Emails
+
+Write a solution to report all the duplicate emails. Note that it's guaranteed that the email field is not NULL.
+
+Return the result table in any order.
+
+The result format is in the following example.
+
+*/ 
+
+drop table if exists Person;
+Create table If Not Exists Person (id int, email varchar(255));
+Truncate table Person;
+insert into Person (id, email) values ('1', 'a@b.com');
+insert into Person (id, email) values ('2', 'c@d.com');
+insert into Person (id, email) values ('3', 'a@b.com');
+
+select * from Person;
+
+select email
+from Person
+group by email
+having count(*) > 1;
+
+-- OR --
+
+select email
+from (
+  select email, count(*) as email_count
+  from Person
+  group by email
+) as subquery
+where subquery.email_count > 1;
+
+
