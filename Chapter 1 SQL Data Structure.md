@@ -1,6 +1,6 @@
 
 
-# SQL Schema
+# Chapter 1: SQL Data Structure
 
 * Database Software (version)
 
@@ -92,3 +92,8 @@ ALTER TABLE `new_schema`.`users`
 CHANGE COLUMN `id` `id` INT(11) NOT NULL AUTO_INCREMENT,
 CHANGE COLUMN `name` `user_name` VARCHAR(45) NOT NULL DEFAULT 'No Name';
 ```
+
+
+
+
+

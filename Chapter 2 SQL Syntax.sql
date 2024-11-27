@@ -375,7 +375,7 @@ SELECT DISTINCT age FROM `new_schema`.`users`;
 
 -- Pagination: LIMIT & OFFSET
 
-SELECT * FROM `new_schema`.`users` LIMIT 3 OFFSET 1;
+SELECT * FROM `new_schema`.`users` LIMIT 3 OFFSET 1; -- like head(), tail()
 
 -- Sorting: ORDER
 
@@ -607,5 +607,43 @@ from (
   group by email
 ) as subquery
 where subquery.email_count > 1;
+
+
+/* EXAMPLE 11: 1050. Actors and Directors Who Cooperated At Least Three Times
+
+Write a solution to find all the pairs (actor_id, director_id) where the actor has cooperated with the director at least three times.
+
+Return the result table in any order.
+
+The result format is in the following example.
+
+*/
+
+Create table If Not Exists ActorDirector (actor_id int, director_id int, timestamp int);
+Truncate table ActorDirector;
+insert into ActorDirector (actor_id, director_id, timestamp) values ('1', '1', '0');
+insert into ActorDirector (actor_id, director_id, timestamp) values ('1', '1', '1');
+insert into ActorDirector (actor_id, director_id, timestamp) values ('1', '1', '2');
+insert into ActorDirector (actor_id, director_id, timestamp) values ('1', '2', '3');
+insert into ActorDirector (actor_id, director_id, timestamp) values ('1', '2', '4');
+insert into ActorDirector (actor_id, director_id, timestamp) values ('2', '1', '5');
+insert into ActorDirector (actor_id, director_id, timestamp) values ('2', '1', '6');
+
+select * from ActorDirector;
+
+select actor_id, director_id
+from (
+  select actor_id, director_id, count(timestamp) as timestamp_count
+  from ActorDirector
+  group by actor_id, director_id
+) as subquery
+where timestamp_count >= 3;
+
+-- OR (produced extra column) --
+
+select actor_id, director_id
+from ActorDirector
+group by actor_id, director_id
+having count(timestamp) >= 3;
 
 
