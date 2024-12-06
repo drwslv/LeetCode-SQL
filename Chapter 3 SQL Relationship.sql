@@ -132,3 +132,57 @@ select * from Address;
 select firstName, lastName, city, state
 from Person
 left join Address on Person.personId = Address.personId;
+
+
+/* EXAMPLE 3: 1158. Market Analysis I
+
+Write a solution to find for each user, the join date and the number of orders they made as a buyer in 2019.
+
+Return the result table in any order.
+
+The result format is in the following example.
+
+*/
+
+drop table if exists Users;
+drop table if exists Orders;
+drop table if exists Items;
+
+Create table If Not Exists Users (user_id int, join_date date, favorite_brand varchar(10));
+Create table If Not Exists Orders (order_id int, order_date date, item_id int, buyer_id int, seller_id int);
+Create table If Not Exists Items (item_id int, item_brand varchar(10));
+Truncate table Users;
+insert into Users (user_id, join_date, favorite_brand) values ('1', '2018-01-01', 'Lenovo');
+insert into Users (user_id, join_date, favorite_brand) values ('2', '2018-02-09', 'Samsung');
+insert into Users (user_id, join_date, favorite_brand) values ('3', '2018-01-19', 'LG');
+insert into Users (user_id, join_date, favorite_brand) values ('4', '2018-05-21', 'HP');
+Truncate table Orders;
+insert into Orders (order_id, order_date, item_id, buyer_id, seller_id) values ('1', '2019-08-01', '4', '1', '2');
+insert into Orders (order_id, order_date, item_id, buyer_id, seller_id) values ('2', '2018-08-02', '2', '1', '3');
+insert into Orders (order_id, order_date, item_id, buyer_id, seller_id) values ('3', '2019-08-03', '3', '2', '3');
+insert into Orders (order_id, order_date, item_id, buyer_id, seller_id) values ('4', '2018-08-04', '1', '4', '2');
+insert into Orders (order_id, order_date, item_id, buyer_id, seller_id) values ('5', '2018-08-04', '1', '3', '4');
+insert into Orders (order_id, order_date, item_id, buyer_id, seller_id) values ('6', '2019-08-05', '2', '2', '4');
+Truncate table Items;
+insert into Items (item_id, item_brand) values ('1', 'Samsung');
+insert into Items (item_id, item_brand) values ('2', 'Lenovo');
+insert into Items (item_id, item_brand) values ('3', 'LG');
+insert into Items (item_id, item_brand) values ('4', 'HP');
+
+select * from Users;
+select * from Orders;
+
+select q2.user_id as buyer_id, q2.join_date, count(q2.order_id) as orders_in_2019
+from (
+    select *
+    from Users
+    left join (
+        select order_id, order_date, buyer_id
+        from Orders
+        where order_date between '2019-01-01' and '2019-12-31'
+    ) as q1
+    on Users.user_id = q1.buyer_id
+) as q2
+group by q2.user_id, q2.join_date;
+
+
