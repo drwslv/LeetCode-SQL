@@ -316,3 +316,40 @@ where sales_id not in (
     where c.name = "RED"
 );
 
+
+/* EXAMPLE 5: 183. Customers Who Never Order
+
+Write a solution to find all customers who never order anything.
+
+Return the result table in any order.
+
+The result format is in the following example.
+
+*/
+
+drop table if exists Customers;
+drop table if exists Orders;
+
+Create table Customers (id int, name varchar(255));
+Create table Orders (id int, customerId int);
+
+insert into Customers (id, name) values ('1', 'Joe'),
+    ('2', 'Henry'),
+    ('3', 'Sam'),
+    ('4', 'Max');
+
+insert into Orders (id, customerId) values('1', '3'),
+    ('2', '1');
+
+select * from Customers;
+select * from Orders;
+
+
+select c.name as Customers
+from Customers c
+where c.id not in (
+    select customerId
+    from Orders
+);
+
+
