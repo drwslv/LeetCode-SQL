@@ -1,4 +1,12 @@
 
+----------------------------------------
+-- (3.1) Relationships
+----------------------------------------
+
+----------------------------------------
+-- (3.2) JOIN
+----------------------------------------
+
 drop schema `new_schema`;
 CREATE SCHEMA `new_schema` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -194,8 +202,117 @@ from Users u
 group by u.user_id, u.join_date;
 
 
+----------------------------------------
+-- (3.3) Subqueries
+----------------------------------------
 
 
+CREATE SCHEMA `new_schema` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+drop table if exists  `new_schema`.`users`;
+CREATE TABLE `new_schema`.`users` (
+  `id` INT NOT NULL AUTO_INCREMENT COMMENT 'This is the primary index',
+  `name` VARCHAR(45) NOT NULL DEFAULT 'N/A',
+  `age` INT NULL,
+  PRIMARY KEY (`id`)
+);
+
+INSERT INTO `new_schema`.`users` (`id`, `name`, `age`) VALUES 
+  (1, 'John', 40),
+  (2, 'May', 30),
+  (3, 'Jim', 22);
+  
+drop table if exists  `new_schema`.`orders`;
+CREATE TABLE `new_schema`.`orders` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT,
+  `note` VARCHAR(255) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+ 
+INSERT INTO `new_schema`.`orders` (`id`, `user_id`, `note`) VALUES 
+  (1, 1, 'some information'), 
+  (2, 2, 'some comments'),
+  (3, 2, 'no comments'),
+  (4, 3, 'more comments');
 
 
+select * from `new_schema`.`users`;
+select * from `new_schema`.`orders`;
+
+-- Equal Condition
+-- Only works if subquery returns a single record
+-- Select only a single column
+
+SELECT * FROM `new_schema`.`orders`
+WHERE user_id = (
+  SELECT id FROM `new_schema`.`users`
+  WHERE name = 'John'
+);
+
+SELECT id FROM `new_schema`.`users`
+    WHERE name = 'John';
+
+
+-- Contain Condition
+-- Works if subquery contains single or multiple records
+-- Select only a single column
+
+SELECT * FROM `new_schema`.`orders`
+WHERE user_id IN (
+  SELECT id FROM `new_schema`.`users`
+  WHERE name LIKE '%j%'
+);
+
+SELECT id FROM `new_schema`.`users`
+  WHERE name LIKE '%j%';
+
+
+/* EXAMPLE 4: 607. Sales Person
+
+Write a solution to find the names of all the salespersons who did not have any orders related to the company with the name "RED".
+
+Return the result table in any order.
+
+The result format is in the following example.
+
+*/
+
+drop table if exists SalesPerson;
+drop table if exists Company;
+drop table if exists Orders;
+
+Create table If Not Exists SalesPerson (sales_id int, name varchar(255), salary int, commission_rate int, hire_date date);
+Create table If Not Exists Company (com_id int, name varchar(255), city varchar(255));
+Create table If Not Exists Orders (order_id int, order_date date, com_id int, sales_id int, amount int);
+Truncate table SalesPerson;
+insert into SalesPerson (sales_id, name, salary, commission_rate, hire_date) values ('1', 'John', '100000', '6', '2006-4-1');
+insert into SalesPerson (sales_id, name, salary, commission_rate, hire_date) values ('2', 'Amy', '12000', '5', '2010-5-1');
+insert into SalesPerson (sales_id, name, salary, commission_rate, hire_date) values ('3', 'Mark', '65000', '12', '2008-12-25');
+insert into SalesPerson (sales_id, name, salary, commission_rate, hire_date) values ('4', 'Pam', '25000', '25', '2005-1-1');
+insert into SalesPerson (sales_id, name, salary, commission_rate, hire_date) values ('5', 'Alex', '5000', '10', '2007-2-3');
+Truncate table Company;
+insert into Company (com_id, name, city) values ('1', 'RED', 'Boston');
+insert into Company (com_id, name, city) values ('2', 'ORANGE', 'New York');
+insert into Company (com_id, name, city) values ('3', 'YELLOW', 'Boston');
+insert into Company (com_id, name, city) values ('4', 'GREEN', 'Austin');
+Truncate table Orders;
+insert into Orders (order_id, order_date, com_id, sales_id, amount) values ('1', '2014-1-1', '3', '4', '10000');
+insert into Orders (order_id, order_date, com_id, sales_id, amount) values ('2', '2014-2-1', '4', '5', '5000');
+insert into Orders (order_id, order_date, com_id, sales_id, amount) values ('3', '2014-3-1', '1', '1', '50000');
+insert into Orders (order_id, order_date, com_id, sales_id, amount) values ('4', '2014-4-1', '1', '4', '25000');
+
+select * from SalesPerson;
+select * from Company;
+select * from Orders;
+
+
+select name
+from SalesPerson
+where sales_id not in (
+    select o.sales_id
+    from Orders o
+    left join Company c on o.com_id = c.com_id
+    where c.name = "RED"
+);
 
