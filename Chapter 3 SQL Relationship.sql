@@ -390,4 +390,67 @@ order by count(*) desc
 limit 1;
 
 
+/* EXAMPLE 7: 1407. Top Travellers
+
+Write a solution to report the distance traveled by each user.
+
+Return the result table ordered by travelled_distance in descending order, if two or more users traveled the same distance, order them by their name in ascending order.
+
+The result format is in the following example.
+
+*/
+
+drop table if exists Users;
+drop table if exists Rides;
+
+Create Table Users (id int, name varchar(30));
+Create Table Rides (id int, user_id int, distance int);
+
+insert into Users (id, name) values ('1', 'Alice'),
+    ('2', 'Bob'),
+    ('3', 'Alex'),
+    ('4', 'Donald'),
+    ('7', 'Lee'),
+    ('13', 'Jonathan'),
+    ('19', 'Elvis');
+
+insert into Rides (id, user_id, distance) values ('1', '1', '120'),
+    ('2', '2', '317'),
+    ('3', '3', '222'),
+    ('4', '7', '100'),
+    ('5', '13', '312'),
+    ('6', '19', '50'),
+    ('7', '7', '120'),
+    ('8', '19', '400'),
+    ('9', '7', '230');
+
+SELECT * FROM Users;
+SELECT * FROM Rides;
+
+
+SELECT u.name, IFNULL(r.travelled_distance, 0) AS travelled_distance
+FROM Users AS u
+LEFT JOIN (
+    SELECT user_id, SUM(distance) AS travelled_distance
+    FROM Rides
+    GROUP BY user_id
+) AS r ON u.id = r.user_id
+ORDER BY r.travelled_distance DESC, u.name ASC;
+
+-- OR --
+
+SELECT 
+    u.name, 
+    IFNULL(SUM(distance),0) AS travelled_distance
+FROM
+    Users u
+LEFT JOIN 
+    Rides r
+ON 
+    u.id = r.user_id
+GROUP BY 
+    u.id
+ORDER BY 2 DESC, 1 ASC
+
+
 
