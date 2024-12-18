@@ -450,7 +450,50 @@ ON
     u.id = r.user_id
 GROUP BY 
     u.id
-ORDER BY 2 DESC, 1 ASC
+ORDER BY 2 DESC, 1 ASC;
+
+
+/* EXAMPLE 8: 1965. Employees With Missing Information
+
+Write a solution to report the IDs of all the employees with missing information. The information of an employee is missing if:
+
+* The employee's name is missing, or
+* The employee's salary is missing.
+
+Return the result table ordered by employee_id in ascending order.
+
+The result format is in the following example.
+
+*/
+
+DROP TABLE IF EXISTS Employees;
+DROP TABLE IF EXISTS Salaries;
+
+Create table If Not Exists Employees (employee_id int, name varchar(30));
+Create table If Not Exists Salaries (employee_id int, salary int);
+insert into Employees (employee_id, name) values ('2', 'Crew'), ('4', 'Haven'), ('5', 'Kristian');
+insert into Salaries (employee_id, salary) values ('5', '76071'), ('1', '22517'), ('4', '63539');
+
+SELECT *FROM Employees;
+SELECT * FROM Salaries;
+
+SELECT employee_id
+FROM (
+    SELECT e.employee_id, name, salary
+    FROM Employees AS e
+    LEFT JOIN Salaries AS s
+        ON e.employee_id = s.employee_id
+
+    UNION
+
+    SELECT s.employee_id, name, salary
+    FROM Employees AS e
+    RIGHT JOIN Salaries AS s
+        ON e.employee_id = s.employee_id
+) AS c
+WHERE c.name IS NULL
+OR c.salary IS NULL
+ORDER BY employee_id ASC;
 
 
 
