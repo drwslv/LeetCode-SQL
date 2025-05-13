@@ -2,3 +2,7 @@
 
 -Do we want distinct listings or not? Clarify.
 
+-Wrapping in query in a SELECT statement guarantees it will return NULL if no rows returned
+
+
+
