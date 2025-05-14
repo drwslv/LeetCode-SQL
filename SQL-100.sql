@@ -268,9 +268,114 @@ FROM World
 WHERE area >= 3000000 OR population >= 25000000;
 
 
+-- May 13 --
+
+/* 1378. Replace Employee ID With The Unique Identifier [E]
+Write a solution to show the unique ID of each user, If a user does not have a unique ID replace just show null.
+Return the result table in any order.
+*/
+
+Drop table if exists Employees;
+Drop table if exists EmployeeUNI;
+Create table If Not Exists Employees (id int, name varchar(20));
+Create table If Not Exists EmployeeUNI (id int, unique_id int);
+Truncate table Employees;
+insert into Employees (id, name) values ('1', 'Alice');
+insert into Employees (id, name) values ('7', 'Bob');
+insert into Employees (id, name) values ('11', 'Meir');
+insert into Employees (id, name) values ('90', 'Winston');
+insert into Employees (id, name) values ('3', 'Jonathan');
+Truncate table EmployeeUNI;
+insert into EmployeeUNI (id, unique_id) values ('3', '1');
+insert into EmployeeUNI (id, unique_id) values ('11', '2');
+insert into EmployeeUNI (id, unique_id) values ('90', '3');
+
+SELECT unique_id, name
+FROM Employees
+LEFT JOIN EmployeeUNI ON Employees.id = EmployeeUNI.id;
 
 
+/* 185. Department Top Three Salaries [H]
+A company's executives are interested in seeing who earns the most money in each of the company's departments.
+A high earner in a department is an employee who has a salary in the top three unique salaries for that department.
+
+Write a solution to find the employees who are high earners in each of the departments.
+
+Return the result table in any order.
+*/
+
+Drop table if exists Employee;
+Drop table if exists Department;
+Create table If Not Exists Employee (id int, name varchar(255), salary int, departmentId int);
+Create table If Not Exists Department (id int, name varchar(255));
+Truncate table Employee;
+insert into Employee (id, name, salary, departmentId) values ('1', 'Joe', '85000', '1');
+insert into Employee (id, name, salary, departmentId) values ('2', 'Henry', '80000', '2');
+insert into Employee (id, name, salary, departmentId) values ('3', 'Sam', '60000', '2');
+insert into Employee (id, name, salary, departmentId) values ('4', 'Max', '90000', '1');
+insert into Employee (id, name, salary, departmentId) values ('5', 'Janet', '69000', '1');
+insert into Employee (id, name, salary, departmentId) values ('6', 'Randy', '85000', '1');
+insert into Employee (id, name, salary, departmentId) values ('7', 'Will', '70000', '1');
+Truncate table Department;
+insert into Department (id, name) values ('1', 'IT');
+insert into Department (id, name) values ('2', 'Sales');
+
+-- Using first N rows
+SELECT d.name AS Department,
+    e1.name AS Employee,
+    e1.salary AS Salary
+FROM Employee e1
+JOIN Department d
+ON e1.departmentId = d.id
+WHERE
+    3 > (SELECT COUNT(DISTINCT e2.salary) -- Are there any higher salaries in the same department? There can be at most 2 higher
+    FROM Employee e2
+    WHERE e2.salary > e1.salary AND e1.departmentId = e2.departmentId
+    );
+
+-- Using DENSE_RANK()
+SELECT Department, Employee, Salary
+FROM (
+    SELECT d.id, 
+        d.name AS Department, 
+        salary AS Salary, 
+        e.name AS Employee, 
+        DENSE_RANK() OVER(PARTITION BY d.id ORDER BY salary DESC) AS rnk
+    FROM Department d
+    JOIN Employee e
+    ON d.id = e.departmentId
+) AS T1
+WHERE T1.rnk <= 3;
 
 
+/* 1193. Monthly Transactions I [M]
+Write an SQL query to find for each month and country, the number of transactions and their total amount,
+the number of approved transactions and their total amount.
+Return the result table in any order.
+*/
 
+Drop table if exists Transactions;
+Create table If Not Exists Transactions (id int, country varchar(4), state enum('approved', 'declined'), amount int, trans_date date);
+Truncate table Transactions;
+insert into Transactions (id, country, state, amount, trans_date) values ('121', 'US', 'approved', '1000', '2018-12-18');
+insert into Transactions (id, country, state, amount, trans_date) values ('122', 'US', 'declined', '2000', '2018-12-19');
+insert into Transactions (id, country, state, amount, trans_date) values ('123', 'US', 'approved', '2000', '2019-01-01');
+insert into Transactions (id, country, state, amount, trans_date) values ('124', 'DE', 'approved', '2000', '2019-01-07');
 
+SELECT *
+FROM Transactions;
+
+SELECT T1.month AS month, T1.country AS country, trans_count, IFNULL(approved_count,0) AS approved_count, trans_total_amount, IFNULL(approved_total_amount,0) AS approved_total_amount
+FROM (
+    SELECT country, DATE_FORMAT(trans_date, '%Y-%m') as month, COUNT(id) AS trans_count, SUM(amount) AS trans_total_amount
+    FROM Transactions
+    GROUP BY country, month
+) AS T1
+LEFT JOIN 
+(
+    SELECT country, DATE_FORMAT(trans_date, '%Y-%m') as month, COUNT(id) AS approved_count, SUM(amount) AS approved_total_amount
+    FROM Transactions
+    WHERE state = 'approved'
+    GROUP BY country, month
+) AS T2
+ON T1.country <=> T2.country AND T1.month = T2.month -- note <=> to include NULL in matching
