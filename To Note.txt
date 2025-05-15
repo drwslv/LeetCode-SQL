@@ -35,7 +35,7 @@ GROUP BY
   customer_id
 
 
-
+-Careful using SUM() vs. COUNT() in GROUP BY
 
 
 
