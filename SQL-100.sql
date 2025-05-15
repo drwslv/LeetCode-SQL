@@ -1,5 +1,9 @@
 
+
+
 -- May 12 --
+
+
 
 /* 1757. Recyclable and Low Fat Products [E]
 Write a solution to find the ids of products that are both low fat and recyclable.
@@ -127,7 +131,10 @@ ORDER BY
     author_id ASC;
 
 
+
 -- May 13 --
+
+
 
 /* 181. Employees Earning More Than Their Managers [E]
 Write a solution to find the employees who earn more than their managers.
@@ -268,7 +275,10 @@ FROM World
 WHERE area >= 3000000 OR population >= 25000000;
 
 
--- May 13 --
+
+-- May 14 --
+
+
 
 /* 1378. Replace Employee ID With The Unique Identifier [E]
 Write a solution to show the unique ID of each user, If a user does not have a unique ID replace just show null.
@@ -493,4 +503,146 @@ LEFT JOIN Transactions T
 ON V.visit_id = T.visit_id
 WHERE T.transaction_id is NULL
 GROUP BY customer_id
+
+-- OR, use NOT IN (maybe conceptually easier)
+SELECT 
+  customer_id, 
+  COUNT(visit_id) AS count_no_trans 
+FROM 
+  Visits 
+WHERE 
+  visit_id NOT IN (
+    SELECT 
+      visit_id 
+    FROM 
+      Transactions
+  ) 
+GROUP BY 
+  customer_id
+
+
+
+-- May 15 --
+
+
+
+/* 1280. Students and Examinations [E]
+Write a solution to find the number of times each student attended each exam.
+Return the result table ordered by student_id and subject_name.
+*/
+
+Drop table if exists Students;
+Drop table if exists Subjects;
+Drop table if exists Examinations;
+Create table If Not Exists Students (student_id int, student_name varchar(20));
+Create table If Not Exists Subjects (subject_name varchar(20));
+Create table If Not Exists Examinations (student_id int, subject_name varchar(20));
+Truncate table Students;
+insert into Students (student_id, student_name) values ('1', 'Alice');
+insert into Students (student_id, student_name) values ('2', 'Bob');
+insert into Students (student_id, student_name) values ('13', 'John');
+insert into Students (student_id, student_name) values ('6', 'Alex');
+Truncate table Subjects;
+insert into Subjects (subject_name) values ('Math');
+insert into Subjects (subject_name) values ('Physics');
+insert into Subjects (subject_name) values ('Programming');
+Truncate table Examinations;
+insert into Examinations (student_id, subject_name) values ('1', 'Math');
+insert into Examinations (student_id, subject_name) values ('1', 'Physics');
+insert into Examinations (student_id, subject_name) values ('1', 'Programming');
+insert into Examinations (student_id, subject_name) values ('2', 'Programming');
+insert into Examinations (student_id, subject_name) values ('1', 'Physics');
+insert into Examinations (student_id, subject_name) values ('1', 'Math');
+insert into Examinations (student_id, subject_name) values ('13', 'Math');
+insert into Examinations (student_id, subject_name) values ('13', 'Programming');
+insert into Examinations (student_id, subject_name) values ('13', 'Physics');
+insert into Examinations (student_id, subject_name) values ('2', 'Math');
+insert into Examinations (student_id, subject_name) values ('1', 'Math');
+
+SELECT *
+FROM Students;
+
+SELECT *
+FROM Subjects;
+
+SELECT *
+FROM Examinations;
+
+SELECT S.student_id AS student_id, S.student_name AS student_name, S.subject_name AS subject_name, IFNULL(E.attended_exams, 0) AS attended_exams
+FROM (
+    SELECT *
+    FROM Students St
+    CROSS JOIN Subjects Su
+) AS S
+LEFT JOIN (
+    SELECT student_id, subject_name, COUNT(subject_name) AS attended_exams
+    FROM Examinations
+    GROUP BY student_id, subject_name
+) AS E
+ON S.student_id = E.student_id AND S.subject_name = E.subject_name
+ORDER BY S.student_id, S.subject_name;
+
+
+/* 1251. Average Selling Price [E]
+Write a solution to find the average selling price for each product. average_price should be rounded to 2 decimal places.
+If a product does not have any sold units, its average selling price is assumed to be 0.
+Return the result table in any order.
+
+*/
+
+Drop table if exists Prices;
+Drop table if exists UnitsSold;
+Create table If Not Exists Prices (product_id int, start_date date, end_date date, price int);
+Create table If Not Exists UnitsSold (product_id int, purchase_date date, units int);
+Truncate table Prices;
+insert into Prices (product_id, start_date, end_date, price) values ('1', '2019-02-17', '2019-02-28', '5');
+insert into Prices (product_id, start_date, end_date, price) values ('1', '2019-03-01', '2019-03-22', '20');
+insert into Prices (product_id, start_date, end_date, price) values ('2', '2019-02-01', '2019-02-20', '15');
+insert into Prices (product_id, start_date, end_date, price) values ('2', '2019-02-21', '2019-03-31', '30');
+Truncate table UnitsSold;
+insert into UnitsSold (product_id, purchase_date, units) values ('1', '2019-02-25', '100');
+insert into UnitsSold (product_id, purchase_date, units) values ('1', '2019-03-01', '15');
+insert into UnitsSold (product_id, purchase_date, units) values ('2', '2019-02-10', '200');
+insert into UnitsSold (product_id, purchase_date, units) values ('2', '2019-03-22', '30');
+
+SELECT *
+FROM Prices;
+
+SELECT *
+FROM UnitsSold;
+
+SELECT Pd.product_id AS product_id, IFNULL(T.average_price,0) AS average_price
+FROM (
+    SELECT DISTINCT product_id
+    FROM Prices
+) AS Pd
+LEFT JOIN (
+    SELECT R.product_id, ROUND(SUM(R.agg_rev)/SUM(R.units), 2) AS average_price
+    FROM (
+        SELECT P.product_id, U.units, (P.price * U.units) AS agg_rev
+        FROM Prices P
+        LEFT JOIN UnitsSold U
+        ON P.product_id = U.product_id
+        WHERE U.purchase_date >= P.start_date AND U.purchase_date <= P.end_date
+    ) AS R
+    GROUP BY R.product_id
+) AS T
+ON Pd.product_id = T.product_id;
+
+
+SELECT
+    p.product_id,
+    IFNULL(ROUND(SUM(p.price * u.units) / SUM(u.units), 2), 0) AS average_price
+FROM
+    Prices AS p
+LEFT JOIN
+    UnitsSold AS u
+ON
+    p.product_id = u.product_id
+    AND u.purchase_date BETWEEN p.start_date AND p.end_date
+GROUP BY
+    p.product_id;
+
+
+
 
