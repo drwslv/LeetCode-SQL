@@ -362,9 +362,7 @@ insert into Transactions (id, country, state, amount, trans_date) values ('122',
 insert into Transactions (id, country, state, amount, trans_date) values ('123', 'US', 'approved', '2000', '2019-01-01');
 insert into Transactions (id, country, state, amount, trans_date) values ('124', 'DE', 'approved', '2000', '2019-01-07');
 
-SELECT *
-FROM Transactions;
-
+-- With JOIN
 SELECT T1.month AS month, T1.country AS country, trans_count, IFNULL(approved_count,0) AS approved_count, trans_total_amount, IFNULL(approved_total_amount,0) AS approved_total_amount
 FROM (
     SELECT country, DATE_FORMAT(trans_date, '%Y-%m') as month, COUNT(id) AS trans_count, SUM(amount) AS trans_total_amount
@@ -379,3 +377,81 @@ LEFT JOIN
     GROUP BY country, month
 ) AS T2
 ON T1.country <=> T2.country AND T1.month = T2.month -- note <=> to include NULL in matching
+
+-- Simpler *********
+SELECT 
+    LEFT(trans_date, 7) AS month,
+    country, 
+    COUNT(id) AS trans_count,
+    SUM(state = 'approved') AS approved_count, -- SUM only hwere state = 'approved'
+    SUM(amount) AS trans_total_amount,
+    SUM((state = 'approved') * amount) AS approved_total_amount
+FROM 
+    Transactions
+GROUP BY 
+    month, country;
+
+
+/* 1164. Product Price at a Given Date [M]
+Write a solution to find the prices of all products on 2019-08-16. Assume the price of all products before any change is 10.
+Return the result table in any order.
+*/
+
+Drop table if exists Products;
+Create table If Not Exists Products (product_id int, new_price int, change_date date);
+Truncate table Products;
+insert into Products (product_id, new_price, change_date) values ('1', '20', '2019-08-14');
+insert into Products (product_id, new_price, change_date) values ('2', '50', '2019-08-14');
+insert into Products (product_id, new_price, change_date) values ('1', '30', '2019-08-15');
+insert into Products (product_id, new_price, change_date) values ('1', '35', '2019-08-16');
+insert into Products (product_id, new_price, change_date) values ('2', '65', '2019-08-17');
+insert into Products (product_id, new_price, change_date) values ('3', '20', '2019-08-18');
+
+SELECT *
+FROM Products;
+
+-- Reference product list
+SELECT DISTINCT product_id
+FROM Products
+
+-- List of prices at certain date
+-- Remove any dates after 2019-08-16
+-- Then, ake most recent date
+SELECT product_id, MAX(change_date) AS change_date
+FROM Products
+WHERE change_date <= '2019-08-16'
+GROUP BY product_id
+
+-- Merge - any mulls should be replaced with 10
+SELECT p1.product_id AS product_id, new_price AS price -- Relevant dates merged with appropriate prices
+FROM Products p1
+INNER JOIN (
+    SELECT product_id, MAX(change_date) AS change_date
+    FROM Products
+    WHERE change_date <= '2019-08-16'
+    GROUP BY product_id
+) AS p2
+ON p1.product_id = p2.product_id AND p1.change_date = p2.change_date
+
+-- All together
+SELECT T1.product_id AS product_id, IFNULL(price, 10) AS price
+FROM (
+    SELECT DISTINCT product_id
+    FROM Products
+) AS T1 -- Unique produce IDs
+LEFT JOIN (
+    SELECT p1.product_id AS product_id, new_price AS price -- Relevant dates merged with appropriate prices
+    FROM Products p1
+    INNER JOIN (
+        SELECT product_id, MAX(change_date) AS change_date
+        FROM Products
+        WHERE change_date <= '2019-08-16'
+        GROUP BY product_id
+    ) AS p2
+    ON p1.product_id = p2.product_id AND p1.change_date = p2.change_date
+) T2
+ON T1.product_id = T2.product_id
+
+-- OR, select obs with minimum change date over the threshold, set the price fo those to 10
+-- and then UNION ALL that with the MAX(change_date) < '2019-09-16' block
+
