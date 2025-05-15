@@ -455,3 +455,42 @@ ON T1.product_id = T2.product_id
 -- OR, select obs with minimum change date over the threshold, set the price fo those to 10
 -- and then UNION ALL that with the MAX(change_date) < '2019-09-16' block
 
+
+/* 1581. Customer Who Visited but Did Not Make Any Transactions [E]
+Write a solution to find the IDs of the users who visited without making any
+transactionsand the number of times they made these types of visits.
+Return the result table sorted in any order.
+*/
+
+Drop table if exists Visits;
+Drop table if exists Transactions;
+Create table If Not Exists Visits(visit_id int, customer_id int);
+Create table If Not Exists Transactions(transaction_id int, visit_id int, amount int);
+Truncate table Visits;
+insert into Visits (visit_id, customer_id) values ('1', '23');
+insert into Visits (visit_id, customer_id) values ('2', '9');
+insert into Visits (visit_id, customer_id) values ('4', '30');
+insert into Visits (visit_id, customer_id) values ('5', '54');
+insert into Visits (visit_id, customer_id) values ('6', '96');
+insert into Visits (visit_id, customer_id) values ('7', '54');
+insert into Visits (visit_id, customer_id) values ('8', '54');
+Truncate table Transactions;
+insert into Transactions (transaction_id, visit_id, amount) values ('2', '5', '310');
+insert into Transactions (transaction_id, visit_id, amount) values ('3', '5', '300');
+insert into Transactions (transaction_id, visit_id, amount) values ('9', '5', '200');
+insert into Transactions (transaction_id, visit_id, amount) values ('12', '1', '910');
+insert into Transactions (transaction_id, visit_id, amount) values ('13', '2', '970');
+
+SELECT *
+FROM Visits;
+
+SELECT *
+FROM Transactions;
+
+SELECT V.customer_id AS customer_id, COUNT(V.visit_id) AS count_no_trans
+FROM Visits V
+LEFT JOIN Transactions T
+ON V.visit_id = T.visit_id
+WHERE T.transaction_id is NULL
+GROUP BY customer_id
+
