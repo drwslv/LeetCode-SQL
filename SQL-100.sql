@@ -686,5 +686,39 @@ ON S.user_id = C.user_id
 GROUP BY S.user_id;
 
 
+/* 610. Triangle Judgement [E]
+Report for every three line segments whether they can form a triangle.
+Return the result table in any order.
+*/
+
+Drop table if exists Triangle;
+Create table If Not Exists Triangle (x int, y int, z int);
+Truncate table Triangle;
+insert into Triangle (x, y, z) values ('13', '15', '30');
+insert into Triangle (x, y, z) values ('10', '20', '15');
+
+SELECT *
+FROM Triangle;
+
+-- max < sum of other two sides
+-- max < sum of all sides - max
+-- 0 < sum of all sides - 2 max
+
+SELECT *, IF((x + y + z) - 2*GREATEST(x, y, z) > 0, 'Yes', 'No') AS triangle
+FROM Triangle;
+
+-- OR more simply
+
+SELECT 
+    x,
+    y,
+    z,
+    CASE
+        WHEN x + y > z AND x + z > y AND y + z > x THEN 'Yes'
+        ELSE 'No'
+    END AS 'triangle'
+FROM
+    triangle
+;
 
 
