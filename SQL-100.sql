@@ -722,3 +722,28 @@ FROM
 ;
 
 
+/* 182. Duplicate Emails [E]
+Write a solution to report all the duplicate emails. Note that it's guaranteed that the email field is not NULL.
+Return the result table in any order.
+*/
+
+Drop table if exists Person;
+Create table If Not Exists Person (id int, email varchar(255));
+Truncate table Person;
+insert into Person (id, email) values ('1', 'a@b.com');
+insert into Person (id, email) values ('2', 'c@d.com');
+insert into Person (id, email) values ('3', 'a@b.com');
+
+SELECT *
+FROM Person;
+
+SELECT T.email AS Email
+FROM (
+    SELECT email, COUNT(id) AS email_count
+    FROM Person
+    GROUP BY email
+    HAVING email_count > 1
+) AS T
+
+
+
