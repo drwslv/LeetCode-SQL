@@ -781,3 +781,59 @@ LEFT JOIN Bonus B
 ON E.empId = B.empId
 WHERE B.bonus < 1000 OR B.bonus IS NULL;
 
+
+/* 180. Consecutive Numbers [M]
+Find all numbers that appear at least three times consecutively.
+Return the result table in any order.
+*/
+
+Drop table if exists Logs;
+Create table If Not Exists Logs (id int, num int);
+Truncate table Logs;
+insert into Logs (id, num) values ('1', '1');
+insert into Logs (id, num) values ('2', '1');
+insert into Logs (id, num) values ('3', '1');
+insert into Logs (id, num) values ('4', '2');
+insert into Logs (id, num) values ('5', '1');
+insert into Logs (id, num) values ('6', '2');
+insert into Logs (id, num) values ('7', '2');
+
+SELECT *
+FROM Logs;
+
+SELECT DISTINCT num AS ConsecutiveNums
+FROM (
+    SELECT *, LAG(T.num_1) OVER (ORDER BY id) AS num_2
+    FROM(
+        SELECT *, LAG(num) OVER (ORDER BY id) AS num_1
+        FROM Logs
+    ) AS T
+) AS T2
+WHERE T2.num = T2.num_1 AND T2.num_1 = T2.num_2
+
+SELECT DISTINCT num AS ConsecutiveNums
+FROM (
+    SELECT *, LAG(num, 1) OVER () AS num_1, LAG(num, 2) OVER () AS num_2
+    FROM Logs
+) AS T
+WHERE num = num_1 AND num_1 = num_2
+
+-- With three-way merge
+
+SELECT DISTINCT
+    l1.Num AS ConsecutiveNums
+FROM
+    Logs l1,
+    Logs l2,
+    Logs l3
+WHERE
+    l1.Id = l2.Id - 1
+    AND l2.Id = l3.Id - 1
+    AND l1.Num = l2.Num
+    AND l2.Num = l3.Num
+;
+
+
+
+
+

@@ -37,6 +37,19 @@ GROUP BY
 
 -Careful using SUM() vs. COUNT() in GROUP BY
 
+-Window Functions
+
+window_function(...) OVER (
+    [PARTITION BY ...]
+    [ORDER BY ...]
+    [ROWS BETWEEN ...]
+)
+
+LAG()
+LEAD()
+RANK(var) OVER (PARTITION var / ORDER BY var)
+
+
 
 
 
