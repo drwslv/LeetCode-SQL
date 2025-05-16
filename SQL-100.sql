@@ -809,14 +809,14 @@ FROM (
         FROM Logs
     ) AS T
 ) AS T2
-WHERE T2.num = T2.num_1 AND T2.num_1 = T2.num_2
+WHERE T2.num = T2.num_1 AND T2.num_1 = T2.num_2;
 
 SELECT DISTINCT num AS ConsecutiveNums
 FROM (
     SELECT *, LAG(num, 1) OVER () AS num_1, LAG(num, 2) OVER () AS num_2
     FROM Logs
 ) AS T
-WHERE num = num_1 AND num_1 = num_2
+WHERE num = num_1 AND num_1 = num_2;
 
 -- With three-way merge
 
@@ -832,6 +832,70 @@ WHERE
     AND l1.Num = l2.Num
     AND l2.Num = l3.Num
 ;
+
+
+/* 550. Game Play Analysis IV [M]
+Write a solution to report the fraction of players that logged in again on the day after the day
+they first logged in, rounded to 2 decimal places. In other words, you need to count the number
+of players that logged in for at least two consecutive days starting from their first login date,
+then divide that number by the total number of players.
+*/
+
+Drop table if exists Activity;
+Create table If Not Exists Activity (player_id int, device_id int, event_date date, games_played int);
+Truncate table Activity;
+insert into Activity (player_id, device_id, event_date, games_played) values ('1', '2', '2016-03-01', '5');
+insert into Activity (player_id, device_id, event_date, games_played) values ('1', '2', '2016-03-02', '6');
+insert into Activity (player_id, device_id, event_date, games_played) values ('2', '3', '2017-06-25', '1');
+insert into Activity (player_id, device_id, event_date, games_played) values ('3', '1', '2016-03-02', '0');
+insert into Activity (player_id, device_id, event_date, games_played) values ('3', '4', '2018-07-03', '5');
+
+SELECT *
+FROM Activity;
+
+-- FIRST (!) login
+
+SELECT ROUND(
+(
+    SELECT COUNT(DISTINCT A.player_id) AS player_logged
+    FROM Activity A
+    INNER JOIN (
+        SELECT player_id, DATE_ADD(T.first_login, INTERVAL 1 day) AS second_login -- Create necessary second logins by players and date
+        FROM (
+            SELECT player_id, min(event_date) AS first_login
+            FROM Activity
+            GROUP BY player_id
+        ) AS T
+    ) AS T2
+    ON A.player_id = T2.player_id AND A.event_date = T2.second_login
+) / 
+(
+    SELECT COUNT(DISTINCT player_id) AS player_total
+    FROM Activity
+),2) AS fraction;
+
+-- Using WITH
+WITH first_logins AS (
+  SELECT
+    A.player_id,
+    MIN(A.event_date) AS first_login
+  FROM
+    Activity A
+  GROUP BY
+    A.player_id
+), consec_logins AS (
+  SELECT
+    COUNT(A.player_id) AS num_logins
+  FROM
+    first_logins F
+    INNER JOIN Activity A ON F.player_id = A.player_id
+    AND F.first_login = DATE_SUB(A.event_date, INTERVAL 1 DAY)
+)
+SELECT
+  ROUND(
+    (SELECT C.num_logins FROM consec_logins C)
+    / (SELECT COUNT(F.player_id) FROM first_logins F)
+  , 2) AS fraction;
 
 
 
