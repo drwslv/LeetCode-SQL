@@ -898,6 +898,86 @@ SELECT
   , 2) AS fraction;
 
 
+/* 626. Exchange Seats [M]
+Write a solution to swap the seat id of every two consecutive students.
+If the number of students is odd, the id of the last student is not swapped.
+Return the result table ordered by id in ascending order.
+*/
+
+Drop table if exists Seat;
+Create table If Not Exists Seat (id int, student varchar(255));
+Truncate table Seat;
+insert into Seat (id, student) values ('1', 'Abbot');
+insert into Seat (id, student) values ('2', 'Doris');
+insert into Seat (id, student) values ('3', 'Emerson');
+insert into Seat (id, student) values ('4', 'Green');
+insert into Seat (id, student) values ('5', 'Jeames');
+
+SELECT *
+FROM Seat;
+
+-- Shift down, save evens
+-- Shift up, save odds
+
+SELECT T.id as id, IFNULL(T.student_new, student) AS student
+FROM (
+    SELECT *
+    FROM (
+        SELECT *, LAG(student, 1) OVER () AS student_new
+        FROM Seat
+    ) AS S1
+    WHERE MOD(S1.id, 2)=0
+    UNION
+    SELECT *
+    FROM (
+        SELECT *, LEAD(student, 1) OVER () AS student_new
+        FROM Seat
+    ) AS S2
+    WHERE MOD(S2.id, 2)=1
+) AS T
+ORDER BY id ASC
+
+
+/* 1070. Product Sales Analysis III [M]
+Write a solution to select the product id, year, quantity, and price for the first year of every
+product sold. If any product is bought multiple times in its first year, return all sales separately.
+Return the resulting table in any order.
+*/
+
+Drop table if exists Sales;
+Drop table if exists Product;
+Create table If Not Exists Sales (sale_id int, product_id int, year int, quantity int, price int);
+Create table If Not Exists Product (product_id int, product_name varchar(10));
+Truncate table Sales;
+insert into Sales (sale_id, product_id, year, quantity, price) values ('1', '100', '2008', '10', '5000');
+insert into Sales (sale_id, product_id, year, quantity, price) values ('2', '100', '2009', '12', '5000');
+insert into Sales (sale_id, product_id, year, quantity, price) values ('7', '200', '2011', '15', '9000');
+Truncate table Product;
+insert into Product (product_id, product_name) values ('100', 'Nokia');
+insert into Product (product_id, product_name) values ('200', 'Apple');
+insert into Product (product_id, product_name) values ('300', 'Samsung');
+
+SELECT *
+FROM Sales;
+
+SELECT *
+FROM Product;
+
+SELECT
+    T0.product_id AS product_id,
+    T0.year AS first_year,
+    T0.quantity AS quantity,
+    T0.price as price
+FROM (
+    SELECT *
+    From Sales
+) AS T0
+INNER JOIN (
+    SELECT product_id, MIN(year) AS year -- Find earliest year for year-product combinations
+    FROM Sales
+    GROUP BY product_id
+) AS T1
+ON T0.product_id = T1.product_id AND T0.year = T1.year
 
 
 
