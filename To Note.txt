@@ -77,3 +77,11 @@ SELECT
   , 2) AS fraction;
 
 
+-String operations:
+Counts characters CHAR_LENGTH() (multi-byte safe)
+Convert to lowercase: LOWER(column_name)
+Convert to uppercase: UPPER(column_name)
+Concatenate strings: CONCAT(col1, col2)
+Extract substring: SUBSTRING(column_name, start, length)
+Find position of substring: LOCATE('substring', column_name)
+Trim spaces: TRIM(column_name)

@@ -1130,3 +1130,24 @@ FROM Person P1, Person P2
 WHERE P1.Email = P2.email AND P1.Id > P2.Id
 
 
+/* 1683. Invalid Tweets [E]
+Write a solution to find the IDs of the invalid tweets. The tweet is invalid if the number of
+characters used in the content of the tweet is strictly greater than 15.
+Return the result table in any order.
+*/
+
+Drop table if exists Tweets;
+Create table If Not Exists Tweets(tweet_id int, content varchar(50));
+Truncate table Tweets;
+insert into Tweets (tweet_id, content) values ('1', 'Let us Code');
+insert into Tweets (tweet_id, content) values ('2', 'More than fifteen chars are here!');
+
+SELECT *
+FROM Tweets;
+
+SELECT tweet_id
+FROM Tweets
+WHERE CHAR_LENGTH(content) > 15
+
+
+
