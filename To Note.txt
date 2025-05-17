@@ -4,7 +4,8 @@
 
 -Wrapping in query in a SELECT statement guarantees it will return NULL if no rows returned
 
--Aggregate by conditions:
+-Aggregate by conditions
+-Note: can use SUM(col1 = col2) but NOT COUNT(col1 = col2)
 SELECT 
     LEFT(trans_date, 7) AS month,
     country, 
@@ -16,6 +17,7 @@ FROM
     Transactions
 GROUP BY 
     month, country;
+
 
 
 -Use of NOT IN

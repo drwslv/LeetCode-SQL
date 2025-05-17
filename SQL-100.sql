@@ -981,3 +981,120 @@ ON T0.product_id = T1.product_id AND T0.year = T1.year
 
 
 
+-- May 17 --
+
+
+/* 1068. Product Sales Analysis I [E]
+Write a solution to report the product_name, year, and price for each sale_id in the Sales table.
+Return the resulting table in any order.
+*/
+
+Drop table if exists Sales;
+Drop table if exists Product;
+Create table If Not Exists Sales (sale_id int, product_id int, year int, quantity int, price int);
+Create table If Not Exists Product (product_id int, product_name varchar(10));
+Truncate table Sales;
+insert into Sales (sale_id, product_id, year, quantity, price) values ('1', '100', '2008', '10', '5000');
+insert into Sales (sale_id, product_id, year, quantity, price) values ('2', '100', '2009', '12', '5000');
+insert into Sales (sale_id, product_id, year, quantity, price) values ('7', '200', '2011', '15', '9000');
+Truncate table Product;
+insert into Product (product_id, product_name) values ('100', 'Nokia');
+insert into Product (product_id, product_name) values ('200', 'Apple');
+insert into Product (product_id, product_name) values ('300', 'Samsung');
+
+SELECT *
+FROM Sales;
+
+SELECT *
+FROM Product;
+
+SELECT P.product_name AS product_name, S.year AS year, S.price AS price
+FROM Sales S
+JOIN Product P
+ON S.product_id = P.product_id;
+
+
+/* 183. Customers Who Never Order [E]
+Write a solution to find all customers who never order anything.
+Return the result table in any order.
+*/
+
+Drop table if exists Customers;
+Drop table if exists Orders;
+Create table If Not Exists Customers (id int, name varchar(255));
+Create table If Not Exists Orders (id int, customerId int);
+Truncate table Customers;
+insert into Customers (id, name) values ('1', 'Joe');
+insert into Customers (id, name) values ('2', 'Henry');
+insert into Customers (id, name) values ('3', 'Sam');
+insert into Customers (id, name) values ('4', 'Max');
+Truncate table Orders;
+insert into Orders (id, customerId) values ('1', '3');
+insert into Orders (id, customerId) values ('2', '1');
+
+SELECT *
+FROM Customers;
+
+SELECT *
+FROM Orders;
+
+SELECT name AS Customers
+FROM Customers
+WHERE id NOT IN (
+    SELECT customerId
+    FROM Orders
+);
+
+
+/* 1174. Immediate Food Delivery II [M]
+If the customer's preferred delivery date is the same as the order date, then the order is called immediate;
+otherwise, it is called scheduled.
+The first order of a customer is the order with the earliest order date that the customer made.
+It is guaranteed that a customer has precisely one first order.
+Write a solution to find the percentage of immediate orders in the first orders of all customers, rounded to 2 decimal places.
+*/
+
+Drop table if exists Delivery;
+Create table If Not Exists Delivery (delivery_id int, customer_id int, order_date date, customer_pref_delivery_date date);
+Truncate table Delivery;
+insert into Delivery (delivery_id, customer_id, order_date, customer_pref_delivery_date) values ('1', '1', '2019-08-01', '2019-08-02');
+insert into Delivery (delivery_id, customer_id, order_date, customer_pref_delivery_date) values ('2', '2', '2019-08-02', '2019-08-02');
+insert into Delivery (delivery_id, customer_id, order_date, customer_pref_delivery_date) values ('3', '1', '2019-08-11', '2019-08-12');
+insert into Delivery (delivery_id, customer_id, order_date, customer_pref_delivery_date) values ('4', '3', '2019-08-24', '2019-08-24');
+insert into Delivery (delivery_id, customer_id, order_date, customer_pref_delivery_date) values ('5', '3', '2019-08-21', '2019-08-22');
+insert into Delivery (delivery_id, customer_id, order_date, customer_pref_delivery_date) values ('6', '2', '2019-08-11', '2019-08-13');
+insert into Delivery (delivery_id, customer_id, order_date, customer_pref_delivery_date) values ('7', '4', '2019-08-09', '2019-08-09');
+
+SELECT *
+FROM Delivery;
+
+SELECT ROUND(100*SUM(T.immediate)/COUNT(*),2) AS immediate_percentage
+FROM (
+    SELECT D1.order_date AS order_date, customer_pref_delivery_date, IF(D1.order_date = D1.customer_pref_delivery_date, 1, 0) AS immediate
+    FROM Delivery D1
+    INNER JOIN (
+        SELECT customer_id, MIN(order_date) AS order_date -- First orders
+        FROM Delivery
+        GROUP BY customer_id
+    ) AS DF
+    ON D1.customer_id = DF.customer_id AND D1.order_date = DF.order_date
+) T;
+
+SELECT ROUND(100*SUM(T.order_date = T.customer_pref_delivery_date)/COUNT(*),2) AS immediate_percentage
+FROM (
+    SELECT D1.order_date AS order_date, customer_pref_delivery_date
+    FROM Delivery D1
+    INNER JOIN (
+        SELECT customer_id, MIN(order_date) AS order_date -- First orders
+        FROM Delivery
+        GROUP BY customer_id
+    ) AS DF
+    ON D1.customer_id = DF.customer_id AND D1.order_date = DF.order_date
+) T;
+
+
+/* 196. Delete Duplicate Emails [E]
+
+
+
+*/
