@@ -1216,3 +1216,44 @@ SELECT DISTINCT Salary
 FROM Employee
 ORDER BY Salary DESC
 LIMIT 2 OFFSET 1
+
+
+/* 1204. Last Person to Fit in the Bus [M]
+There is a queue of people waiting to board a bus. However, the bus has a weight limit of 1000 kilograms,
+so there may be some people who cannot board.
+Write a solution to find the person_name of the last person that can fit on the bus without exceeding the
+weight limit. The test cases are generated such that the first person does not exceed the weight limit.
+Note that only one person can board the bus at any given turn.
+*/
+
+Drop table if exists Queue;
+Create table If Not Exists Queue (person_id int, person_name varchar(30), weight int, turn int);
+Truncate table Queue;
+insert into Queue (person_id, person_name, weight, turn) values ('5', 'Alice', '250', '1');
+insert into Queue (person_id, person_name, weight, turn) values ('4', 'Bob', '175', '5');
+insert into Queue (person_id, person_name, weight, turn) values ('3', 'Alex', '350', '2');
+insert into Queue (person_id, person_name, weight, turn) values ('6', 'John Cena', '400', '3');
+insert into Queue (person_id, person_name, weight, turn) values ('1', 'Winston', '500', '6');
+insert into Queue (person_id, person_name, weight, turn) values ('2', 'Marie', '200', '4');
+
+SELECT *
+FROM Queue;
+
+SELECT person_name
+FROM (
+    SELECT *, SUM(weight) OVER (ORDER BY turn) AS weight_sum
+    FROM Queue
+) T
+WHERE T.weight_sum <= 1000
+ORDER BY weight_sum DESC
+LIMIT 1
+
+
+-- Smart:
+SELECT 
+    *
+FROM Queue q1 JOIN Queue q2 ON q1.turn >= q2.turn
+GROUP BY q1.turn
+HAVING SUM(q2.weight) <= 1000
+ORDER BY SUM(q2.weight) DESC
+LIMIT 1

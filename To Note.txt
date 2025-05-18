@@ -47,10 +47,10 @@ window_function(...) OVER (
     [ROWS BETWEEN ...]
 )
 
-LAG()
-LEAD()
-RANK(var) OVER (PARTITION BY var / ORDER BY var)
-
+LAG(var, 1)
+LEAD(var, 1)
+RANK() OVER (PARTITION BY var / ORDER BY var)
+SUM(var) OVER (ORDER BY var)
 
 -Using WITH keyword:
 
@@ -85,3 +85,30 @@ Concatenate strings: CONCAT(col1, col2)
 Extract substring: SUBSTRING(column_name, start, length)
 Find position of substring: LOCATE('substring', column_name)
 Trim spaces: TRIM(column_name)
+
+
+-3rd highest salary
+
+SELECT DISTINCT Salary
+FROM Employee E1
+WHERE 3 = (
+    SELECT COUNT(DISTINCT Salary)
+    FROM Employee E2
+    WHERE E2.Salary >= E1.Salary
+);
+
+
+-3rd highest salary
+
+SELECT DISTINCT Salary
+FROM Employee
+ORDER BY Salary DESC
+LIMIT 2 OFFSET 1
+
+
+-select last row
+ORDER BY var DESC
+LIMIT 1
+
+
+
