@@ -1246,14 +1246,49 @@ FROM (
 ) T
 WHERE T.weight_sum <= 1000
 ORDER BY weight_sum DESC
-LIMIT 1
+LIMIT 1;
 
 
--- Smart:
+-- Smarter: correlated subquery
 SELECT 
     *
 FROM Queue q1 JOIN Queue q2 ON q1.turn >= q2.turn
 GROUP BY q1.turn
 HAVING SUM(q2.weight) <= 1000
 ORDER BY SUM(q2.weight) DESC
-LIMIT 1
+LIMIT 1;
+
+
+/* 1211. Queries Quality and Percentage
+We define query quality as:
+    The average of the ratio between query rating and its position.
+
+We also define poor query percentage as:
+    The percentage of all queries with rating less than 3.
+
+Write a solution to find each query_name, the quality and poor_query_percentage.
+Both quality and poor_query_percentage should be rounded to 2 decimal places.
+Return the result table in any order.
+*/
+
+Drop table if exists Queries;
+Create table If Not Exists Queries (query_name varchar(30), result varchar(50), position int, rating int);
+Truncate table Queries;
+insert into Queries (query_name, result, position, rating) values ('Dog', 'Golden Retriever', '1', '5');
+insert into Queries (query_name, result, position, rating) values ('Dog', 'German Shepherd', '2', '5');
+insert into Queries (query_name, result, position, rating) values ('Dog', 'Mule', '200', '1');
+insert into Queries (query_name, result, position, rating) values ('Cat', 'Shirazi', '5', '2');
+insert into Queries (query_name, result, position, rating) values ('Cat', 'Siamese', '3', '3');
+insert into Queries (query_name, result, position, rating) values ('Cat', 'Sphynx', '7', '4');
+
+SELECT *
+FROM Queries;
+
+SELECT T.query_name AS query_name, ROUND(AVG(T.quality_ind), 2) AS quality, ROUND(AVG(T.poor_ind)*100,2) AS poor_query_percentage
+FROM (
+    SELECT *, (rating/position) AS quality_ind, IF(rating < 3, 1, 0) AS poor_ind
+    FROM Queries
+) AS T
+GROUP BY T.query_name
+
+
