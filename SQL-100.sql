@@ -1292,3 +1292,56 @@ FROM (
 GROUP BY T.query_name
 
 
+/* 1321. Restaurant Growth [M]
+You are the restaurant owner and you want to analyze a possible expansion
+(there will be at least one customer every day).
+
+Compute the moving average of how much the customer paid in a seven days window
+(i.e., current day + 6 days before). average_amount should be rounded to two decimal places.
+
+Return the result table ordered by visited_on in ascending order.
+
+*/
+
+Drop table if exists Customer;
+Create table If Not Exists Customer (customer_id int, name varchar(20), visited_on date, amount int);
+Truncate table Customer;
+insert into Customer (customer_id, name, visited_on, amount) values ('1', 'Jhon', '2019-01-01', '100');
+insert into Customer (customer_id, name, visited_on, amount) values ('2', 'Daniel', '2019-01-02', '110');
+insert into Customer (customer_id, name, visited_on, amount) values ('3', 'Jade', '2019-01-03', '120');
+insert into Customer (customer_id, name, visited_on, amount) values ('4', 'Khaled', '2019-01-04', '130');
+insert into Customer (customer_id, name, visited_on, amount) values ('5', 'Winston', '2019-01-05', '110');
+insert into Customer (customer_id, name, visited_on, amount) values ('6', 'Elvis', '2019-01-06', '140');
+insert into Customer (customer_id, name, visited_on, amount) values ('7', 'Anna', '2019-01-07', '150');
+insert into Customer (customer_id, name, visited_on, amount) values ('8', 'Maria', '2019-01-08', '80');
+insert into Customer (customer_id, name, visited_on, amount) values ('9', 'Jaze', '2019-01-09', '110');
+insert into Customer (customer_id, name, visited_on, amount) values ('1', 'Jhon', '2019-01-10', '130');
+insert into Customer (customer_id, name, visited_on, amount) values ('3', 'Jade', '2019-01-10', '150');
+
+SELECT *
+FROM Customer;
+
+SELECT T2.visited_on AS visited_on, T2.amount7 AS amount, T2.average_amount7 AS average_amount
+FROM (
+    SELECT *,
+        ROUND(SUM(T.amount) OVER (
+        ORDER BY visited_on ASC
+        RANGE BETWEEN INTERVAL 6 DAY PRECEDING AND CURRENT ROW
+        ),2) AS amount7,
+        ROUND(AVG(T.amount) OVER (
+        ORDER BY visited_on ASC
+        RANGE BETWEEN INTERVAL 6 DAY PRECEDING AND CURRENT ROW
+        ),2) AS average_amount7
+    FROM (
+        SELECT visited_on, SUM(amount) AS amount
+        FROM Customer
+        GROUP BY visited_on
+    ) AS T
+) AS T2
+WHERE T2.visited_on >= (
+    SELECT DATE_ADD(MIN(visited_on), INTERVAL 6 day)
+    FROM Customer
+)
+
+
+
