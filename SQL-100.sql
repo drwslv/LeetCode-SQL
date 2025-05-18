@@ -1151,3 +1151,68 @@ WHERE CHAR_LENGTH(content) > 15
 
 
 
+-- May 18 --
+
+
+
+/* 177. Nth Highest Salary [M]
+Write a solution to find the nth highest distinct salary from the Employee table.
+If there are less than n distinct salaries, return null.
+*/
+
+Drop table if exists Employee;
+Create table If Not Exists Employee (Id int, Salary int);
+Truncate table Employee;
+insert into Employee (id, salary) values ('1', '100');
+insert into Employee (id, salary) values ('2', '200');
+insert into Employee (id, salary) values ('3', '300');
+insert into Employee (id, salary) values ('3', '300');
+
+
+SELECT *
+FROM Employee;
+
+-- Can't use a window function (RANK) inside a function declaration
+SELECT DISTINCT T.Salary
+FROM (
+    SELECT Salary, RANK() OVER (ORDER BY Salary) AS Salary_rank
+    FROM Employee
+) T
+WHERE T.Salary_rank = 5;
+
+-- Correlated subquery
+-- For each salary in E1, how many distinct salaries in E2 are greater or equal?
+-- If Salary=100 in E1, then in E2 there is 100, 200, and 300, so 3 distinct salaries, so 100 is rank 3
+SELECT DISTINCT Salary
+FROM Employee E1
+WHERE 3 = (
+    SELECT COUNT(DISTINCT Salary)
+    FROM Employee E2
+    WHERE E2.Salary >= E1.Salary
+);
+
+SELECT COUNT(DISTINCT Salary)
+FROM Employee E2;
+
+CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+DETERMINISTIC
+BEGIN
+    RETURN (
+        -- Write your MySQL query statement below.
+        SELECT DISTINCT Salary
+        FROM Employee E1
+        WHERE N = (
+            SELECT COUNT(DISTINCT Salary)
+            FROM Employee E2
+            WHERE E2.Salary >= E1.Salary
+        )
+    );
+END
+
+SELECT getNthHighestSalary(5);
+
+-- OR, even easier, limit/offset
+SELECT DISTINCT Salary
+FROM Employee
+ORDER BY Salary DESC
+LIMIT 2 OFFSET 1
