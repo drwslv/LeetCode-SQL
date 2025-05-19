@@ -1341,7 +1341,7 @@ FROM (
 WHERE T2.visited_on >= (
     SELECT DATE_ADD(MIN(visited_on), INTERVAL 6 day)
     FROM Customer
-)
+);
 
 
 /* 1141. User Activity for the Past 30 Days I [E]
@@ -1371,4 +1371,39 @@ FROM Activity;
 SELECT activity_date AS day, COUNT(DISTINCT user_id) AS active_users
 FROM Activity
 WHERE activity_date BETWEEN DATE_SUB('2019-07-27', INTERVAL 29 day) AND '2019-07-27'
-GROUP BY activity_date
+GROUP BY activity_date;
+
+
+
+-- May 18 Pt. 2 --
+
+
+
+/* 1731. The Number of Employees Which Report to Each Employee [E]
+For this problem, we will consider a manager [to be] an employee who has at least 1 other employee reporting to them.
+
+Write a solution to report the ids and the names of all managers, the number of employees who report directly to them,
+and the average age of the reports rounded to the nearest integer.
+
+Return the result table ordered by employee_id.
+*/
+
+Drop table if exists Employees;
+Create table If Not Exists Employees(employee_id int, name varchar(20), reports_to int, age int);
+Truncate table Employees;
+insert into Employees (employee_id, name, reports_to, age) values ('9', 'Hercy', NULL, '43');
+insert into Employees (employee_id, name, reports_to, age) values ('6', 'Alice', '9', '41');
+insert into Employees (employee_id, name, reports_to, age) values ('4', 'Bob', '9', '36');
+insert into Employees (employee_id, name, reports_to, age) values ('2', 'Winston', NULL, '37');
+
+SELECT *
+FROM Employees;
+
+SELECT E2.employee_id AS employee_id, E2.name AS name, COUNT(*) AS reports_count, ROUND(AVG(E1.age),0) AS average_age
+FROM Employees E1
+INNER JOIN Employees E2
+ON E1.reports_to = E2.employee_id
+GROUP BY E2.employee_id, E2.name
+ORDER BY employee_id;
+
+
