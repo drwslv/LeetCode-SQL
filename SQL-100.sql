@@ -1499,4 +1499,46 @@ ON T1.departmentId = T2.departmentId AND T1.salary = T2.salary
 WHERE T2.max_salary = 1;
 
 
+/* 3214. Year on Year Growth Rate [H]
+Write a solution to calculate the year-on-year growth rate for the total spend for each product.
+
+The result table should include the following columns:
+* year: The year of the transaction.
+* product_id: The ID of the product.
+* curr_year_spend: The total spend for the current year.
+* prev_year_spend: The total spend for the previous year.
+* yoy_rate: The year-on-year growth rate percentage, rounded to 2 decimal places.
+
+Return the result table ordered by product_id,year in ascending order.
+*/
+
+Drop table if exists user_transactions;
+Create Table if not exists user_transactions( transaction_id int, product_id int, spend decimal(10,2), transaction_date datetime);
+Truncate table user_transactions;
+insert into user_transactions (transaction_id, product_id, spend, transaction_date) values ('1341', '123424', '1500.6', '2019-12-31 12:00:00');
+insert into user_transactions (transaction_id, product_id, spend, transaction_date) values ('1423', '123424', '1000.2', '2020-12-31 12:00:00');
+insert into user_transactions (transaction_id, product_id, spend, transaction_date) values ('1623', '123424', '1246.44', '2021-12-31 12:00:00');
+insert into user_transactions (transaction_id, product_id, spend, transaction_date) values ('1322', '123424', '2145.32', '2022-12-31 12:00:00');
+
+SELECT *
+FROM user_transactions;
+
+WITH Q1 AS (
+    SELECT  T.year, T.product_id, SUM(spend) AS curr_year_spend
+    FROM (
+        SELECT *, SUBSTRING(transaction_date, 1, 4) AS year
+        FROM user_transactions
+    ) AS T
+    GROUP BY T.product_id, T.year
+)
+SELECT Q1.year+0 AS year, Q1.product_id AS product_id, Q1.curr_year_spend as curr_year_spend,
+    Q2.prev_year_spend AS prev_year_spend, ROUND(100*(Q1.curr_year_spend - Q2.prev_year_spend)/Q2.prev_year_spend,2) AS yoy_rate
+FROM Q1
+LEFT JOIN (
+    SELECT year+1 AS year, product_id as product_id, curr_year_spend as prev_year_spend
+    FROM Q1
+) Q2
+ON Q1.year = Q2.year AND Q1.product_id = Q2.product_id
+ORDER BY product_id, year ASC
+
 
