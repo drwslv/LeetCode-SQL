@@ -1407,3 +1407,37 @@ GROUP BY E2.employee_id, E2.name
 ORDER BY employee_id;
 
 
+/* 602. Friend Requests II: Who Has the Most Friends [M]
+Write a solution to find the people who have the most friends and the most friends number.
+The test cases are generated so that only one person has the most friends.
+*/
+
+Drop table if exists RequestAccepted;
+Create table If Not Exists RequestAccepted (requester_id int not null, accepter_id int null, accept_date date null);
+Truncate table RequestAccepted;
+insert into RequestAccepted (requester_id, accepter_id, accept_date) values ('1', '2', '2016/06/03');
+insert into RequestAccepted (requester_id, accepter_id, accept_date) values ('1', '3', '2016/06/08');
+insert into RequestAccepted (requester_id, accepter_id, accept_date) values ('2', '3', '2016/06/08');
+insert into RequestAccepted (requester_id, accepter_id, accept_date) values ('3', '4', '2016/06/09');
+
+SELECT *
+FROM RequestAccepted;
+
+SELECT T.id as id, COUNT(*) as num
+FROM (
+    SELECT requester_id AS id
+    FROM RequestAccepted
+    UNION ALL
+    SELECT accepter_id AS id
+    FROM RequestAccepted
+) AS T
+GROUP BY T.id
+ORDER BY num DESC
+LIMIT 1
+
+
+/*
+
+
+*/
+
