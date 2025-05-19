@@ -1542,3 +1542,28 @@ ON Q1.year = Q2.year AND Q1.product_id = Q2.product_id
 ORDER BY product_id, year ASC
 
 
+
+-- May 19 --
+
+
+
+/* 1667. Fix Names in a Table[E]
+Write a solution to fix the names so that only the first character is uppercase and the rest are lowercase.
+Return the result table ordered by user_id.
+*/
+
+Drop table if exists Users;
+Create table If Not Exists Users (user_id int, name varchar(40));
+Truncate table Users;
+insert into Users (user_id, name) values ('1', 'aLice');
+insert into Users (user_id, name) values ('2', 'bOB');
+
+SELECT *
+FROM Users;
+
+SELECT user_id, CONCAT(UPPER(SUBSTRING(name,1,1)), LOWER(SUBSTRING(name,2))) AS name
+FROM Users
+ORDER BY user_id
+
+
+
