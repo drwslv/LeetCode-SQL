@@ -1547,7 +1547,7 @@ ORDER BY product_id, year ASC
 
 
 
-/* 1667. Fix Names in a Table[E]
+/* 1667. Fix Names in a Table [E]
 Write a solution to fix the names so that only the first character is uppercase and the rest are lowercase.
 Return the result table ordered by user_id.
 */
@@ -1563,7 +1563,108 @@ FROM Users;
 
 SELECT user_id, CONCAT(UPPER(SUBSTRING(name,1,1)), LOWER(SUBSTRING(name,2))) AS name
 FROM Users
-ORDER BY user_id
+ORDER BY user_id;
 
+
+/* 511. Game Play Analysis I [E]
+Write a solution to find the first login date for each player.
+Return the result table in any order.
+*/
+
+Drop table if exists Activity;
+Create table If Not Exists Activity (player_id int, device_id int, event_date date, games_played int);
+Truncate table Activity;
+insert into Activity (player_id, device_id, event_date, games_played) values ('1', '2', '2016-03-01', '5');
+insert into Activity (player_id, device_id, event_date, games_played) values ('1', '2', '2016-05-02', '6');
+insert into Activity (player_id, device_id, event_date, games_played) values ('2', '3', '2017-06-25', '1');
+insert into Activity (player_id, device_id, event_date, games_played) values ('3', '1', '2016-03-02', '0');
+insert into Activity (player_id, device_id, event_date, games_played) values ('3', '4', '2018-07-03', '5');
+
+SELECT *
+FROM Activity;
+
+SELECT player_id, MIN(event_date) AS first_login
+FROM Activity
+GROUP BY player_id;
+
+
+/* 262. Trips and Users [H]
+The cancellation rate is computed by dividing the number of canceled (by client or driver) requests with unbanned users
+by the total number of requests with unbanned users on that day.
+Write a solution to find the cancellation rate of requests with unbanned users (both client and driver must not be banned)
+each day between "2013-10-01" and "2013-10-03" with at least one trip. Round Cancellation Rate to two decimal points.
+Return the result table in any order.
+*/
+
+Drop table if exists Trips;
+Drop table if exists Users;
+Create table If Not Exists Trips (id int, client_id int, driver_id int, city_id int, status ENUM('completed', 'cancelled_by_driver', 'cancelled_by_client'), request_at varchar(50));
+Create table If Not Exists Users (users_id int, banned varchar(50), role ENUM('client', 'driver', 'partner'));
+Truncate table Trips;
+insert into Trips (id, client_id, driver_id, city_id, status, request_at) values ('1', '1', '10', '1', 'completed', '2013-10-01');
+insert into Trips (id, client_id, driver_id, city_id, status, request_at) values ('2', '2', '11', '1', 'cancelled_by_driver', '2013-10-01');
+insert into Trips (id, client_id, driver_id, city_id, status, request_at) values ('3', '3', '12', '6', 'completed', '2013-10-01');
+insert into Trips (id, client_id, driver_id, city_id, status, request_at) values ('4', '4', '13', '6', 'cancelled_by_client', '2013-10-01');
+insert into Trips (id, client_id, driver_id, city_id, status, request_at) values ('5', '1', '10', '1', 'completed', '2013-10-02');
+insert into Trips (id, client_id, driver_id, city_id, status, request_at) values ('6', '2', '11', '6', 'completed', '2013-10-02');
+insert into Trips (id, client_id, driver_id, city_id, status, request_at) values ('7', '3', '12', '6', 'completed', '2013-10-02');
+insert into Trips (id, client_id, driver_id, city_id, status, request_at) values ('8', '2', '12', '12', 'completed', '2013-10-03');
+insert into Trips (id, client_id, driver_id, city_id, status, request_at) values ('9', '3', '10', '12', 'completed', '2013-10-03');
+insert into Trips (id, client_id, driver_id, city_id, status, request_at) values ('10', '4', '13', '12', 'cancelled_by_driver', '2013-10-03');
+Truncate table Users;
+insert into Users (users_id, banned, role) values ('1', 'No', 'client');
+insert into Users (users_id, banned, role) values ('2', 'Yes', 'client');
+insert into Users (users_id, banned, role) values ('3', 'No', 'client');
+insert into Users (users_id, banned, role) values ('4', 'No', 'client');
+insert into Users (users_id, banned, role) values ('10', 'No', 'driver');
+insert into Users (users_id, banned, role) values ('11', 'No', 'driver');
+insert into Users (users_id, banned, role) values ('12', 'No', 'driver');
+insert into Users (users_id, banned, role) values ('13', 'No', 'driver');
+
+SELECT *
+FROM Trips;
+
+SELECT *
+FROM Users;
+
+SELECT A.request_at AS Day, ROUND(SUM(status = 'cancelled_by_client' or status = 'cancelled_by_driver')/COUNT(status),2) AS 'Cancellation Rate'
+FROM (
+    SELECT status, request_at
+    FROM Trips T
+    LEFT JOIN ( -- LEFT JOIN with client info only
+        SELECT users_id AS client_id, banned AS banned_client
+        FROM Users
+        WHERE role = 'client'
+    ) AS C
+    ON T.client_id = C.client_id 
+    LEFT JOIN ( -- LEFT JOIN with driver info only
+        SELECT users_id as driver_id, banned AS banned_driver
+        FROM Users
+        WHERE role = 'driver'
+    ) AS D
+    ON T.driver_id = D.driver_id
+    WHERE C.banned_client = 'No' AND D.banned_driver = 'no' -- filter valid clients and drivers
+        AND T.request_at >= '2013-10-01' AND T.request_at <= '2013-10-03' 
+) AS A
+GROUP BY A.request_at
+
+-- Without top subqueries
+SELECT request_at AS Day, ROUND(SUM(status = 'cancelled_by_client' or status = 'cancelled_by_driver')/COUNT(status),2) AS 'Cancellation Rate'
+    FROM Trips T
+    LEFT JOIN ( -- LEFT JOIN with client info only
+        SELECT users_id AS client_id, banned AS banned_client
+        FROM Users
+        WHERE role = 'client'
+    ) AS C
+    ON T.client_id = C.client_id 
+    LEFT JOIN ( -- LEFT JOIN with driver info only
+        SELECT users_id as driver_id, banned AS banned_driver
+        FROM Users
+        WHERE role = 'driver'
+    ) AS D
+    ON T.driver_id = D.driver_id
+    WHERE C.banned_client = 'No' AND D.banned_driver = 'no' -- filter valid clients and drivers
+        AND T.request_at >= '2013-10-01' AND T.request_at <= '2013-10-03' 
+GROUP BY T.request_at
 
 

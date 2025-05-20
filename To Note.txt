@@ -52,6 +52,7 @@ LEAD(var, 1)
 RANK() OVER (PARTITION BY var / ORDER BY var)
 SUM(var) OVER (ORDER BY var)
 
+
 -Using WITH keyword:
 
 WITH first_logins AS (
