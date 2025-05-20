@@ -1646,7 +1646,7 @@ FROM (
     WHERE C.banned_client = 'No' AND D.banned_driver = 'no' -- filter valid clients and drivers
         AND T.request_at >= '2013-10-01' AND T.request_at <= '2013-10-03' 
 ) AS A
-GROUP BY A.request_at
+GROUP BY A.request_at;
 
 -- Without top subqueries
 SELECT request_at AS Day, ROUND(SUM(status = 'cancelled_by_client' or status = 'cancelled_by_driver')/COUNT(status),2) AS 'Cancellation Rate'
@@ -1665,6 +1665,38 @@ SELECT request_at AS Day, ROUND(SUM(status = 'cancelled_by_client' or status = '
     ON T.driver_id = D.driver_id
     WHERE C.banned_client = 'No' AND D.banned_driver = 'no' -- filter valid clients and drivers
         AND T.request_at >= '2013-10-01' AND T.request_at <= '2013-10-03' 
-GROUP BY T.request_at
+GROUP BY T.request_at;
+
+
+/* 1978. Employees Whose Manager Left the Company [E]
+Find the IDs of the employees whose salary is strictly less than $30000 and whose manager left the company.
+When a manager leaves the company, their information is deleted from the Employees table,
+but the reports still have their manager_id set to the manager that left.
+Return the result table ordered by employee_id.
+*/
+
+Drop table if exists Employees;
+Create table If Not Exists Employees (employee_id int, name varchar(20), manager_id int, salary int);
+Truncate table Employees;
+insert into Employees (employee_id, name, manager_id, salary) values ('3', 'Mila', '9', '60301');
+insert into Employees (employee_id, name, manager_id, salary) values ('12', 'Antonella', NULL, '31000');
+insert into Employees (employee_id, name, manager_id, salary) values ('13', 'Emery', NULL, '67084');
+insert into Employees (employee_id, name, manager_id, salary) values ('1', 'Kalel', '11', '21241');
+insert into Employees (employee_id, name, manager_id, salary) values ('9', 'Mikaela', NULL, '50937');
+insert into Employees (employee_id, name, manager_id, salary) values ('11', 'Joziah', '6', '28485');
+
+SELECT *
+FROM Employees;
+
+SELECT employee_id
+FROM Employees
+WHERE salary < 30000
+AND manager_id NOT IN (
+    SELECT E2.employee_id
+    FROM Employees E2
+)
+ORDER BY employee_id;
+
+
 
 
