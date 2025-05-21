@@ -1801,6 +1801,88 @@ LEFT JOIN (
     ) as G
 ) AS S2
 ON S1.score = S2.score
-ORDER BY S1.score DESC
+ORDER BY S1.score DESC;
+
+
+/* 1336. Number of Transactions per Visit [H]
+A bank wants to draw a chart of the number of transactions bank visitors did in one visit to the bank
+and the corresponding number of visitors who have done this number of transaction in one visit.
+
+Write a solution to find how many users visited the bank and didn't do any transactions, how many
+visited the bank and did one transaction, and so on.
+
+The result table will contain two columns:
+
+* transactions_count which is the number of transactions done in one visit.
+* visits_count which is the corresponding number of users who did transactions_count in one visit to the bank.
+
+transactions_count should take all values from 0 to max(transactions_count) done by one or more users.
+
+Return the result table ordered by transactions_count.
+*/
+
+Drop table if exists Visits;
+Drop table if exists Transactions;
+Create table If Not Exists Visits (user_id int, visit_date date);
+Create table If Not Exists Transactions (user_id int, transaction_date date, amount int);
+Truncate table Visits;
+insert into Visits (user_id, visit_date) values ('1', '2020-01-01');
+insert into Visits (user_id, visit_date) values ('2', '2020-01-02');
+insert into Visits (user_id, visit_date) values ('12', '2020-01-01');
+insert into Visits (user_id, visit_date) values ('19', '2020-01-03');
+insert into Visits (user_id, visit_date) values ('1', '2020-01-02');
+insert into Visits (user_id, visit_date) values ('2', '2020-01-03');
+insert into Visits (user_id, visit_date) values ('1', '2020-01-04');
+insert into Visits (user_id, visit_date) values ('7', '2020-01-11');
+insert into Visits (user_id, visit_date) values ('9', '2020-01-25');
+insert into Visits (user_id, visit_date) values ('8', '2020-01-28');
+Truncate table Transactions;
+insert into Transactions (user_id, transaction_date, amount) values ('1', '2020-01-02', '120');
+insert into Transactions (user_id, transaction_date, amount) values ('2', '2020-01-03', '22');
+insert into Transactions (user_id, transaction_date, amount) values ('7', '2020-01-11', '232');
+insert into Transactions (user_id, transaction_date, amount) values ('1', '2020-01-04', '7');
+insert into Transactions (user_id, transaction_date, amount) values ('9', '2020-01-25', '33');
+insert into Transactions (user_id, transaction_date, amount) values ('9', '2020-01-25', '66');
+insert into Transactions (user_id, transaction_date, amount) values ('8', '2020-01-28', '1');
+insert into Transactions (user_id, transaction_date, amount) values ('9', '2020-01-25', '99');
+
+SELECT *
+FROM Visits;
+
+SELECT *
+FROM Transactions;
+
+WITH RECURSIVE R AS( -- transactions_count, visits_count
+    SELECT transactions_count, COUNT(*) AS visits_count
+    FROM(
+        SELECT V.user_id AS user_id, V.visit_date AS visit_date, IFNULL(T.transactions_count, 0) AS transactions_count
+        FROM Visits V
+        LEFT JOIN (
+            SELECT user_id, transaction_date, COUNT(*) AS transactions_count
+            FROM Transactions 
+            GROUP BY user_id, transaction_date
+        ) AS T
+        ON V.user_id = T.user_id AND V.visit_date = T.transaction_date
+    ) AS G
+    GROUP BY transactions_count
+),
+seq(n) AS ( -- This creates a sequence from 0 to MAX(transactions_count)
+  SELECT 0
+  UNION ALL
+  SELECT n + 1 FROM seq
+  WHERE n < (SELECT MAX(transactions_count) FROM R)
+)
+SELECT S.transactions_count AS transactions_count, IFNULL(visits_count, 0) AS visits_count
+FROM (
+    SELECT n AS transactions_count
+    from seq
+) S
+LEFT JOIN R
+ON S.transactions_count = R.transactions_count
+ORDER BY S.transactions_count;
+
+
+
+
 
 
