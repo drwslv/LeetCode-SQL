@@ -2045,3 +2045,78 @@ FROM Teacher
 GROUP BY teacher_id;
 
 
+/* 1341. Movie Rating [M]
+Write a solution to:
+
+* Find the name of the user who has rated the greatest number of movies. In case of a tie,
+return the lexicographically smaller user name.
+
+* Find the movie name with the highest average rating in February 2020. In case of a tie,
+return the lexicographically smaller movie name.
+*/
+
+Drop table if exists Movies;
+Drop table if exists Users;
+Drop table if exists MovieRating;
+Create table If Not Exists Movies (movie_id int, title varchar(30));
+Create table If Not Exists Users (user_id int, name varchar(30));
+Create table If Not Exists MovieRating (movie_id int, user_id int, rating int, created_at date);
+Truncate table Movies;
+insert into Movies (movie_id, title) values ('1', 'Avengers');
+insert into Movies (movie_id, title) values ('2', 'Frozen 2');
+insert into Movies (movie_id, title) values ('3', 'Joker');
+Truncate table Users;
+insert into Users (user_id, name) values ('1', 'Daniel');
+insert into Users (user_id, name) values ('2', 'Monica');
+insert into Users (user_id, name) values ('3', 'Maria');
+insert into Users (user_id, name) values ('4', 'James');
+Truncate table MovieRating;
+insert into MovieRating (movie_id, user_id, rating, created_at) values ('1', '1', '3', '2020-01-12');
+insert into MovieRating (movie_id, user_id, rating, created_at) values ('1', '2', '4', '2020-02-11');
+insert into MovieRating (movie_id, user_id, rating, created_at) values ('1', '3', '2', '2020-02-12');
+insert into MovieRating (movie_id, user_id, rating, created_at) values ('1', '4', '1', '2020-01-01');
+insert into MovieRating (movie_id, user_id, rating, created_at) values ('2', '1', '5', '2020-02-17');
+insert into MovieRating (movie_id, user_id, rating, created_at) values ('2', '2', '2', '2020-02-01');
+insert into MovieRating (movie_id, user_id, rating, created_at) values ('2', '3', '2', '2020-03-01');
+insert into MovieRating (movie_id, user_id, rating, created_at) values ('3', '1', '3', '2020-02-22');
+insert into MovieRating (movie_id, user_id, rating, created_at) values ('3', '2', '4', '2020-02-25');
+
+SELECT *
+FROM Movies;
+
+SELECT *
+FROM Users;
+
+SELECT *
+FROM MovieRating;
+
+SELECT Q1.results AS results
+FROM (
+    SELECT U.name AS results
+    FROM (
+        SELECT user_id, COUNT(rating) AS cnt
+        FROM MovieRating
+        GROUP BY user_id
+    ) AS T
+    LEFT JOIN Users U
+    ON T.user_id = U.user_id
+    ORDER BY cnt DESC, name ASC
+    LIMIT 1
+) AS Q1
+UNION ALL
+SELECT Q2. results AS results
+FROM (
+    SELECT M.title AS results
+    FROM (
+        SELECT movie_id, AVG(rating) AS avg_rating
+        FROM MovieRating
+        WHERE SUBSTRING(created_at,1,7) = '2020-02'
+        GROUP BY movie_id
+    ) AS T2
+    LEFT JOIN Movies M
+    ON T2.movie_id = M.movie_id
+    ORDER BY T2.avg_rating DESC, M.title ASC
+    LIMIT 1
+) AS Q2
+
+
