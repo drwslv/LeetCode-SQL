@@ -2117,6 +2117,55 @@ FROM (
     ON T2.movie_id = M.movie_id
     ORDER BY T2.avg_rating DESC, M.title ASC
     LIMIT 1
-) AS Q2
+) AS Q2;
 
 
+/* 1972. First and Last Call On the Same Day [H]
+Write a solution to report the IDs of the users whose first and last calls on any day were with
+the same person. Calls are counted regardless of being the caller or the recipient.
+Return the result table in any order.
+*/
+
+Drop table if exists Calls;
+Create table If Not Exists Calls (caller_id int, recipient_id int, call_time datetime);
+Truncate table Calls;
+insert into Calls (caller_id, recipient_id, call_time) values ('8', '4', '2021-08-24 17:46:07');
+insert into Calls (caller_id, recipient_id, call_time) values ('4', '8', '2021-08-24 19:57:13');
+insert into Calls (caller_id, recipient_id, call_time) values ('5', '1', '2021-08-11 05:28:44');
+insert into Calls (caller_id, recipient_id, call_time) values ('8', '3', '2021-08-17 04:04:15');
+insert into Calls (caller_id, recipient_id, call_time) values ('11', '3', '2021-08-17 13:07:00');
+insert into Calls (caller_id, recipient_id, call_time) values ('8', '11', '2021-08-17 22:22:22');
+
+SELECT *
+FROM Calls;
+
+
+WITH D AS (
+    SELECT *, SUBSTRING(call_time,1,10) AS call_day -- all calls as caller_id
+    FROM (
+        SELECT *
+        FROM Calls C1
+        UNION ALL
+        SELECT *
+        FROM (
+            SELECT C2.recipient_id AS caller_id, C2.caller_id AS recipient_id, call_time
+            FROM Calls C2
+        ) C2
+    ) AS T
+)
+SELECT DISTINCT D1.caller_id AS user_id -- D1.caller_id, D1.call_day, D1.first_call, D1.last_call, D2.recipient_id AS first_recipient, D3.recipient_id AS last_recipient
+FROM (
+    SELECT D.caller_id, D.call_day, MIN(D.call_time) AS first_call, MAX(D.call_time) AS last_call
+    FROM D
+    GROUP BY D.caller_id, D.call_day
+) D1
+JOIN D D2
+ON D1.caller_id = D2.caller_id AND D1.first_call = D2.call_time -- D2 for first calls
+JOIN D D3
+ON D1.caller_id = D3.caller_id AND D1.last_call = D3.call_time -- D3 for last calls
+WHERE D2.recipient_id = D3.recipient_id
+
+ -- (WOW, actually solved it, and beats 82.97%)
+
+
+ 
