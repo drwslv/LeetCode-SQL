@@ -1882,7 +1882,45 @@ ON S.transactions_count = R.transactions_count
 ORDER BY S.transactions_count;
 
 
+/* 1789. Primary Department for Each Employee [E]
+Employees can belong to multiple departments. When the employee joins other departments,
+they need to decide which department is their primary department. Note that when an employee
+belongs to only one department, their primary column is 'N'.
 
+Write a solution to report all the employees with their primary department. For employees who
+belong to one department, report their only department.
+
+Return the result table in any order.
+*/
+
+Drop table if exists Employee;
+Create table If Not Exists Employee (employee_id int, department_id int, primary_flag ENUM('Y','N'));
+Truncate table Employee;
+insert into Employee (employee_id, department_id, primary_flag) values ('1', '1', 'N');
+insert into Employee (employee_id, department_id, primary_flag) values ('2', '1', 'Y');
+insert into Employee (employee_id, department_id, primary_flag) values ('2', '2', 'N');
+insert into Employee (employee_id, department_id, primary_flag) values ('3', '3', 'N');
+insert into Employee (employee_id, department_id, primary_flag) values ('4', '2', 'N');
+insert into Employee (employee_id, department_id, primary_flag) values ('4', '3', 'Y');
+insert into Employee (employee_id, department_id, primary_flag) values ('4', '4', 'N');
+
+SELECT *
+FROM Employee
+
+SELECT E1.employee_id AS employee_id, E1.department_id AS department_id
+FROM Employee E1
+JOIN (
+    SELECT E2.employee_id, COUNT(*) AS dept_cnt
+    FROM Employee E2
+    GROUP BY E2.employee_id
+    HAVING dept_cnt = 1
+) AS G
+ON E1.employee_id = G.employee_id
+UNION ALL
+SELECT E.employee_id AS employee_id, E.department_id AS department_id
+FROM Employee E
+WHERE primary_flag = 'Y'
+ORDER BY employee_id
 
 
 
