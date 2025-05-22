@@ -984,6 +984,7 @@ ON T0.product_id = T1.product_id AND T0.year = T1.year
 -- May 17 --
 
 
+
 /* 1068. Product Sales Analysis I [E]
 Write a solution to report the product_name, year, and price for each sale_id in the Sales table.
 Return the resulting table in any order.
@@ -1762,7 +1763,7 @@ ORDER BY PC1.customer_id;
 
 
 
---- May 20 --
+-- May 20 / May 21 --
 
 
 
@@ -1989,5 +1990,36 @@ SELECT contest_id,
 FROM Register R
 GROUP BY contest_id
 ORDER BY percentage DESC, contest_id ASC
+
+
+
+-- May 22 --
+
+
+
+/* 627. Swap Salary [E]
+Write a solution to swap all 'f' and 'm' values (i.e., change all 'f' values to 'm' and vice versa) with a
+single update statement and no intermediate temporary tables.
+Note that you must write a single update statement, do not write any select statement for this problem.
+*/
+
+Drop table if exists Salary;
+Create table If Not Exists Salary (id int, name varchar(100), sex char(1), salary int);
+Truncate table Salary;
+insert into Salary (id, name, sex, salary) values ('1', 'A', 'm', '2500');
+insert into Salary (id, name, sex, salary) values ('2', 'B', 'f', '1500');
+insert into Salary (id, name, sex, salary) values ('3', 'C', 'm', '5500');
+insert into Salary (id, name, sex, salary) values ('4', 'D', 'f', '500');
+
+SELECT *
+FROM Salary;
+
+UPDATE Salary
+SET sex = CASE
+    WHEN sex = 'm' THEN 'f'
+    WHEN sex = 'f' THEN 'm'
+END;
+
+
 
 
