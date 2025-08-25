@@ -1,1 +1,12 @@
+
+To create a new container and database:
+
 docker run --name mysql-container -e MYSQL_ROOT_PASSWORD=root -e MYSQL_DATABASE=testdb -d -p 3306:3306 mysql:latest
+
+
+To remove:
+
+docker rm -f mysql-container
+docker volume ls
+docker inspect mysql-container | grep -A 3 Mounts
+docker volume rm <volume_name>

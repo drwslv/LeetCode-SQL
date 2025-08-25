@@ -2163,9 +2163,334 @@ JOIN D D2
 ON D1.caller_id = D2.caller_id AND D1.first_call = D2.call_time -- D2 for first calls
 JOIN D D3
 ON D1.caller_id = D3.caller_id AND D1.last_call = D3.call_time -- D3 for last calls
-WHERE D2.recipient_id = D3.recipient_id
+WHERE D2.recipient_id = D3.recipient_id;
 
  -- (WOW, actually solved it, and beats 82.97%)
 
 
- 
+
+-- August 13... --
+
+
+
+/* 3436. Find Valid Emails [E]
+Write a solution to find all the valid email addresses. A valid email address meets the following criteria:
+
+* It contains exactly one @ symbol.
+* It ends with .com.
+* The part before the @ symbol contains only alphanumeric characters and underscores.
+* The part after the @ symbol and before .com contains a domain name that contains only letters.
+
+Return the result table ordered by user_id in ascending order.
+*/
+
+DROP TABLE IF EXISTS Users;
+CREATE TABLE If not Exists Users (user_id INT, email VARCHAR(255));
+Truncate table Users;
+insert into Users (user_id, email) values ('1', 'alice@example.com');
+insert into Users (user_id, email) values ('2', 'bob_at_example.com');
+insert into Users (user_id, email) values ('3', 'charlie@example.net');
+insert into Users (user_id, email) values ('4', 'david@domain.com');
+insert into Users (user_id, email) values ('5', 'eve@invalid');
+
+SELECT * FROM Users;
+
+SELECT *
+FROM Users
+WHERE email LIKE '%@%'
+    AND email NOT LIKE '%@%@%'
+    AND email LIKE '%.com'
+    AND email REGEXP '^[A-Za-z0-9]+@.*'
+    AND email REGEXP '.*@[A-Za-z]+.com$'
+ORDER BY user_id ASC;
+
+SELECT *
+FROM Users
+WHERE email REGEXP '^[A-Za-z0-9]+@[A-Za-z]+\\.com$'
+ORDER BY user_id ASC;
+
+
+/* 517. Find Users With Valid E-Mails [E]
+Write a solution to find the users who have valid emails.
+
+A valid e-mail has a prefix name and a domain where:
+
+* The prefix name is a string that may contain letters (upper or lower case), digits, underscore '_', period '.', and/or dash '-'.
+    The prefix name must start with a letter.
+* The domain is '@leetcode.com'.
+
+Return the result table in any order.
+*/
+
+Drop table if exists Users;
+Create table If Not Exists Users (user_id int, name varchar(30), mail varchar(50));
+Truncate table Users;
+insert into Users (user_id, name, mail) values ('1', 'Winston', 'winston@leetcode.com');
+insert into Users (user_id, name, mail) values ('2', 'Jonathan', 'jonathanisgreat');
+insert into Users (user_id, name, mail) values ('3', 'Annabelle', 'bella-@leetcode.com');
+insert into Users (user_id, name, mail) values ('4', 'Sally', 'sally.come@leetcode.com');
+insert into Users (user_id, name, mail) values ('5', 'Marwan', 'quarz#2020@leetcode.com');
+insert into Users (user_id, name, mail) values ('6', 'David', 'david69@gmail.com');
+insert into Users (user_id, name, mail) values ('7', 'Shapiro', '.shapo@leetcode.com');
+
+SELECT *
+FROM Users;
+
+SELECT *
+FROM Users
+WHERE mail REGEXP BINARY '^[A-Za-z][A-Za-z0-9_.-]*@leetcode\\.com$';
+
+SELECT *
+FROM Users
+WHERE REGEXP_LIKE(
+  mail,
+  '^[A-Za-z][A-Za-z0-9_.-]*@leetcode\\.com$',
+  'c'  -- 'c' = case-sensitive
+);
+
+/* 1907. Count Salary Categories [M]
+Write a solution to calculate the number of bank accounts for each salary category. The salary categories are:
+
+* "Low Salary": All the salaries strictly less than $20000.
+* "Average Salary": All the salaries in the inclusive range [$20000, $50000].
+* "High Salary": All the salaries strictly greater than $50000.
+
+The result table must contain all three categories. If there are no accounts in a category, return 0.
+
+Return the result table in any order.
+*/
+
+Drop table if exists Accounts;
+Create table If Not Exists Accounts (account_id int, income int);
+Truncate table Accounts;
+insert into Accounts (account_id, income) values ('3', '108939');
+insert into Accounts (account_id, income) values ('2', '12747');
+insert into Accounts (account_id, income) values ('8', '87709');
+insert into Accounts (account_id, income) values ('6', '91796');
+
+SELECT *
+FROM Accounts;
+
+SELECT 'Low Salary' AS category, COUNT(*) AS accounts_count
+FROM (
+    SELECT income
+    FROM Accounts
+    WHERE income < 20000
+) as L
+UNION ALL
+SELECT 'Average Salary' AS category, COUNT(*) AS accounts_count
+FROM (
+    SELECT income
+    FROM Accounts
+    WHERE income >= 20000
+    AND income <= 50000
+) as M
+UNION ALL
+SELECT 'High Salary' AS category, COUNT(*) AS accounts_count
+FROM (
+    SELECT income
+    FROM Accounts
+    WHERE income > 50000
+) as H
+
+
+/* 1179. Reformat Department Table [E]
+Reformat the table such that there is a department id column and a revenue column for each month.
+
+Return the result table in any order.
+*/
+
+Drop table if exists Department;
+Create table If Not Exists Department (id int, revenue int, month varchar(5));
+Truncate table Department;
+insert into Department (id, revenue, month) values ('1', '8000', 'Jan');
+insert into Department (id, revenue, month) values ('2', '9000', 'Jan');
+insert into Department (id, revenue, month) values ('3', '10000', 'Feb');
+insert into Department (id, revenue, month) values ('1', '7000', 'Feb');
+insert into Department (id, revenue, month) values ('1', '6000', 'Mar');
+
+SELECT *
+FROM Department;
+
+SELECT
+  id,
+  SUM(CASE WHEN month = 'Jan' THEN revenue END) AS Jan_Revenue,
+  SUM(CASE WHEN month = 'Feb' THEN revenue END) AS Feb_Revenue,
+  SUM(CASE WHEN month = 'Mar' THEN revenue END) AS Mar_Revenue,
+  SUM(CASE WHEN month = 'Apr' THEN revenue END) AS Apr_Revenue,
+  SUM(CASE WHEN month = 'May' THEN revenue END) AS May_Revenue,
+  SUM(CASE WHEN month = 'Jun' THEN revenue END) AS Jun_Revenue,
+  SUM(CASE WHEN month = 'Jul' THEN revenue END) AS Jul_Revenue,
+  SUM(CASE WHEN month = 'Aug' THEN revenue END) AS Aug_Revenue,
+  SUM(CASE WHEN month = 'Sep' THEN revenue END) AS Sep_Revenue,
+  SUM(CASE WHEN month = 'Oct' THEN revenue END) AS Oct_Revenue,
+  SUM(CASE WHEN month = 'Nov' THEN revenue END) AS Nov_Revenue,
+  SUM(CASE WHEN month = 'Dec' THEN revenue END) AS Dec_Revenue
+FROM Department
+GROUP BY id;
+
+Drop table if exists Department;
+
+
+/* 1407. Top Travellers [E]
+Write a solution to report the distance traveled by each user.
+
+Return the result table ordered by travelled_distance in descending order,
+if two or more users traveled the same distance, order them by their name in ascending order.
+*/
+
+Drop table if exists Users;
+Drop table if exists Rides;
+Create Table If Not Exists Users (id int, name varchar(30));
+Create Table If Not Exists Rides (id int, user_id int, distance int);
+Truncate table Users;
+insert into Users (id, name) values ('1', 'Alice');
+insert into Users (id, name) values ('2', 'Bob');
+insert into Users (id, name) values ('3', 'Alex');
+insert into Users (id, name) values ('4', 'Donald');
+insert into Users (id, name) values ('7', 'Lee');
+insert into Users (id, name) values ('13', 'Jonathan');
+insert into Users (id, name) values ('19', 'Elvis');
+Truncate table Rides;
+insert into Rides (id, user_id, distance) values ('1', '1', '120');
+insert into Rides (id, user_id, distance) values ('2', '2', '317');
+insert into Rides (id, user_id, distance) values ('3', '3', '222');
+insert into Rides (id, user_id, distance) values ('4', '7', '100');
+insert into Rides (id, user_id, distance) values ('5', '13', '312');
+insert into Rides (id, user_id, distance) values ('6', '19', '50');
+insert into Rides (id, user_id, distance) values ('7', '7', '120');
+insert into Rides (id, user_id, distance) values ('8', '19', '400');
+insert into Rides (id, user_id, distance) values ('9', '7', '230');
+
+select *
+from Users;
+
+select *
+from Rides;
+
+
+With R AS (
+    SELECT user_id, SUM(distance) AS travelled_distance
+    FROM Rides
+    GROUP BY user_id
+)
+SELECT name, IFNULL(travelled_distance, 0) AS travelled_distance
+FROM Users U
+LEFT JOIN R
+    ON U.id = R.user_id
+ORDER BY travelled_distance DESC, name ASC;
+
+
+Drop table if exists Users;
+Drop table if exists Rides;
+
+
+/* 1075. Project Employees I [E]
+Write an SQL query that reports the average experience years of all the employees for each project, rounded to 2 digits.
+
+Return the result table in any order.
+*/
+
+Drop table if exists Project;
+Drop table if exists Employee;
+Create table If Not Exists Project (project_id int, employee_id int);
+Create table If Not Exists Employee (employee_id int, name varchar(10), experience_years int);
+Truncate table Project;
+insert into Project (project_id, employee_id) values ('1', '1');
+insert into Project (project_id, employee_id) values ('1', '2');
+insert into Project (project_id, employee_id) values ('1', '3');
+insert into Project (project_id, employee_id) values ('2', '1');
+insert into Project (project_id, employee_id) values ('2', '4');
+Truncate table Employee;
+insert into Employee (employee_id, name, experience_years) values ('1', 'Khaled', '3');
+insert into Employee (employee_id, name, experience_years) values ('2', 'Ali', '2');
+insert into Employee (employee_id, name, experience_years) values ('3', 'John', '1');
+insert into Employee (employee_id, name, experience_years) values ('4', 'Doe', '2');
+
+SELECT *
+FROM Project;
+
+SELECT *
+FROM Employee;
+
+
+SELECT P.project_id, ROUND(IFNULL(AVG(experience_years),0),2) AS average_years
+FROM Project P
+LEFT JOIN Employee E
+    ON P.employee_id = E.employee_id
+GROUP BY P.project_id;
+
+
+Drop table if exists Project;
+Drop table if exists Employee;
+
+
+/* 1549. The Most Recent Orders for Each Product [M]
+Write a solution to find the most recent order(s) of each product.
+
+Return the result table ordered by product_name in ascending order and in case of a tie by the product_id in ascending order.
+If there still a tie, order them by order_id in ascending order.
+*/
+
+Drop table If Exists Customers;
+Drop table If Exists Orders;
+Drop table If Exists Products;
+Create table If Not Exists Customers (customer_id int, name varchar(10));
+Create table If Not Exists Orders (order_id int, order_date date, customer_id int, product_id int);
+Create table If Not Exists Products (product_id int, product_name varchar(20), price int);
+Truncate table Customers;
+insert into Customers (customer_id, name) values ('1', 'Winston');
+insert into Customers (customer_id, name) values ('2', 'Jonathan');
+insert into Customers (customer_id, name) values ('3', 'Annabelle');
+insert into Customers (customer_id, name) values ('4', 'Marwan');
+insert into Customers (customer_id, name) values ('5', 'Khaled');
+Truncate table Orders;
+insert into Orders (order_id, order_date, customer_id, product_id) values ('1', '2020-07-31', '1', '1');
+insert into Orders (order_id, order_date, customer_id, product_id) values ('2', '2020-7-30', '2', '2');
+insert into Orders (order_id, order_date, customer_id, product_id) values ('3', '2020-08-29', '3', '3');
+insert into Orders (order_id, order_date, customer_id, product_id) values ('4', '2020-07-29', '4', '1');
+insert into Orders (order_id, order_date, customer_id, product_id) values ('5', '2020-06-10', '1', '2');
+insert into Orders (order_id, order_date, customer_id, product_id) values ('6', '2020-08-01', '2', '1');
+insert into Orders (order_id, order_date, customer_id, product_id) values ('7', '2020-08-01', '3', '1');
+insert into Orders (order_id, order_date, customer_id, product_id) values ('8', '2020-08-03', '1', '2');
+insert into Orders (order_id, order_date, customer_id, product_id) values ('9', '2020-08-07', '2', '3');
+insert into Orders (order_id, order_date, customer_id, product_id) values ('10', '2020-07-15', '1', '2');
+Truncate table Products;
+insert into Products (product_id, product_name, price) values ('1', 'keyboard', '120');
+insert into Products (product_id, product_name, price) values ('2', 'mouse', '80');
+insert into Products (product_id, product_name, price) values ('3', 'screen', '600');
+insert into Products (product_id, product_name, price) values ('4', 'hard disk', '450');
+
+SELECT *
+FROM Customers;
+
+SELECT *
+FROM Orders;
+
+SELECT *
+FROM Products;
+
+WITH Rec AS (
+    SELECT P.product_id, MAX(O.order_date) as order_date
+    FROM Orders O
+    LEFT JOIN Products P
+        ON O.product_id = P.product_id
+    GROUP BY P.product_id
+)
+SELECT P2.product_name, O2.product_id, O2.order_id, O2.order_date
+FROM Orders O2
+JOIN Rec
+    ON O2.product_id = Rec.product_id
+    AND O2.order_date = Rec.order_date
+JOIN Products P2
+    ON O2.product_id = P2.product_id
+ORDER BY P2.product_name ASC, O2.product_id ASC, O2.order_id ASC;
+
+
+Drop table If Exists Customers;
+Drop table If Exists Orders;
+Drop table If Exists Products;
+
+
+
+
