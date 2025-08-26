@@ -1,6 +1,6 @@
 
 
--- 08/25: 1/5
+-- 08/25: 1/5 
 
 /* 2995. Viewers Turned Streamers [H]
 Write a solution to find the number of streaming sessions for users whose first session was as a viewer.
@@ -47,3 +47,74 @@ ORDER BY sessions_count DESC, S2.user_id DESC;
 -- Beats 95% whooo!
 
 Drop table if exists Sessions;
+
+
+
+-- 08/25: 1/5 
+
+/* 585. Investments in 2016 [M]
+Write a solution to report the sum of all total investment values in 2016 tiv_2016, for all policyholders who:
+
+* have the same tiv_2015 value as one or more other policyholders, and
+
+* are not located in the same city as any other policyholder (i.e., the (lat, lon) attribute pairs must be unique).
+
+Round tiv_2016 to two decimal places.
+*/
+
+Drop table if exists Insurance;
+Create Table If Not Exists Insurance (pid int, tiv_2015 float, tiv_2016 float, lat float, lon float);
+Truncate table Insurance;
+insert into Insurance (pid, tiv_2015, tiv_2016, lat, lon) values ('1', '10', '5', '10', '10');
+insert into Insurance (pid, tiv_2015, tiv_2016, lat, lon) values ('2', '20', '20', '20', '20');
+insert into Insurance (pid, tiv_2015, tiv_2016, lat, lon) values ('3', '10', '30', '20', '20');
+insert into Insurance (pid, tiv_2015, tiv_2016, lat, lon) values ('4', '10', '40', '40', '40');
+
+SELECT *
+FROM Insurance;
+
+
+WITH shared AS (
+    SELECT tiv_2015, COUNT(*) AS shared_tiv_2015
+    FROM Insurance
+    GROUP BY tiv_2015
+    HAVING shared_tiv_2015 > 1
+)
+
+WITH uniquell AS (
+    SELECT lat, lon, COUNT(*) AS shared_lat_lon
+    FROM Insurance
+    GROUP BY lat, lon
+    HAVING shared_lat_lon = 1
+)
+SELECT *
+FROM uniquell;
+
+
+SELECT ROUND(SUM(tiv_2016),2) AS tiv_2016
+FROM Insurance I
+WHERE I.tiv_2015 IN (
+    SELECT S1.tiv_2015
+    FROM (
+        SELECT tiv_2015, COUNT(*) AS shared_tiv_2015
+        FROM Insurance
+        GROUP BY tiv_2015
+        HAVING shared_tiv_2015 > 1
+    ) AS S1
+)
+AND (I.lat, I.lon) IN (
+    SELECT S2.lat, S2.lon
+    FROM (
+        SELECT lat, lon, COUNT(*) AS shared_lat_lon
+        FROM Insurance
+        GROUP BY lat, lon
+        HAVING shared_lat_lon = 1
+    ) AS S2
+);
+
+
+-- Using JOIN is often faster for optimizer
+
+Drop table if exists Insurance;
+
+
