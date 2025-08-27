@@ -118,3 +118,55 @@ AND (I.lat, I.lon) IN (
 Drop table if exists Insurance;
 
 
+/* 1045. Customers Who Bought All Products [M]
+Write a solution to report the customer ids from the Customer table that bought all the products in the Product table.
+
+Return the result table in any order.
+*/
+
+Drop table if exists Customer;
+Drop table if exists Product;
+Create table If Not Exists Customer (customer_id int, product_key int);
+Create table Product (product_key int);
+Truncate table Customer;
+insert into Customer (customer_id, product_key) values ('1', '5');
+insert into Customer (customer_id, product_key) values ('2', '6');
+insert into Customer (customer_id, product_key) values ('3', '5');
+insert into Customer (customer_id, product_key) values ('3', '6');
+insert into Customer (customer_id, product_key) values ('1', '6');
+Truncate table Product;
+insert into Product (product_key) values ('5');
+insert into Product (product_key) values ('6');
+
+SELECT *
+FROM Customer;
+
+SELECT *
+FROM Product;
+
+
+WITH Invalid AS (
+    SELECT DISTINCT C.customer_id AS invalid_id, P.product_key, C2.customer_id
+    FROM Customer C
+    CROSS JOIN (
+        SELECT product_key
+        FROM Product
+    ) P
+    LEFT JOIN Customer C2
+    ON C.customer_id = C2.customer_id
+    AND P.product_key = C2.product_key
+    WHERE C2.customer_id IS NULL
+)
+SELECT DISTINCT C3.customer_id
+FROM Customer C3
+WHERE C3.customer_id NOT IN (
+    SELECT I.invalid_id
+    FROM Invalid I
+);
+
+
+
+
+
+Drop table if exists Customer;
+Drop table if exists Product;
