@@ -338,3 +338,85 @@ WITH T1 AS (
 SELECT product_name, totals as unit
 FROM Products P
 JOIN T1 USING(product_id);
+
+Drop table if exists Products;
+Drop table if exists Orders;
+
+
+
+/* 1205. Monthly Transactions II [M]
+Write a solution to find for each month and country:
+the number of approved transactions and their total amount,
+the number of chargebacks, and their total amount.
+
+Note: In your solution, given the month and country, ignore rows with all zeros.
+
+Return the result table in any order.
+*/
+
+Drop table if exists Transactions;
+Drop table if exists Chargebacks;
+Create table If Not Exists Transactions (id int, country varchar(4), state enum('approved', 'declined'), amount int, trans_date date);
+Create table If Not Exists Chargebacks (trans_id int, trans_date date);
+Truncate table Transactions;
+insert into Transactions (id, country, state, amount, trans_date) values ('101', 'US', 'approved', '1000', '2019-05-18');
+insert into Transactions (id, country, state, amount, trans_date) values ('102', 'US', 'declined', '2000', '2019-05-19');
+insert into Transactions (id, country, state, amount, trans_date) values ('103', 'US', 'approved', '3000', '2019-06-10');
+insert into Transactions (id, country, state, amount, trans_date) values ('104', 'US', 'declined', '4000', '2019-06-13');
+insert into Transactions (id, country, state, amount, trans_date) values ('105', 'US', 'approved', '5000', '2019-06-15');
+Truncate table Chargebacks;
+insert into Chargebacks (trans_id, trans_date) values ('102', '2019-05-29');
+insert into Chargebacks (trans_id, trans_date) values ('101', '2019-06-30');
+insert into Chargebacks (trans_id, trans_date) values ('105', '2019-09-18');
+
+SELECT *
+FROM Transactions;
+
+SELECT *
+FROM Chargebacks;
+
+WITH Chg AS (
+    SELECT *
+    FROM Chargebacks C
+    LEFT JOIN (
+        SELECT id AS trans_id, country, amount AS chargeback_amount
+        FROM Transactions
+    ) T
+    USING (trans_id)
+),
+App AS (
+    SELECT DATE_FORMAT(trans_date, '%Y-%m') AS trans_month, country, 1 AS approved_count, amount AS approved_amount, 0 AS chargeback_count, 0 AS chargeback_amount
+    FROM Transactions 
+    WHERE state = 'approved'
+),
+AllData AS (
+    SELECT DATE_FORMAT(trans_date, '%Y-%m') AS trans_month, country, 0 AS approved_count, 0 as approved_amount, 1 AS chargeback_count, chargeback_amount
+    FROM Chg
+    UNION ALL
+    SELECT *
+    FROM App
+)
+SELECT trans_month AS month, country,
+    SUM(approved_count) AS approved_count,
+    SUM(approved_amount) AS approved_amount,
+    SUM(chargeback_count) AS chargeback_count,
+    SUM(chargeback_amount) AS chargeback_amount
+FROM AllData
+GROUP BY trans_month, country;
+
+
+
+
+
+
+
+
+
+
+Drop table if exists Transactions;
+Drop table if exists Chargebacks;
+
+
+
+
+
