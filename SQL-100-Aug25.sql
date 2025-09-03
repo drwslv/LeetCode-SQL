@@ -516,3 +516,89 @@ GROUP BY login_date;
 Drop table if exists Traffic;
 
 
+
+/* 1225. Report Contiguous Dates [H]
+A system is running one task every day. Every task is independent of the previous tasks. The tasks can fail or succeed.
+
+Write a solution to report the period_state for each continuous interval of days in the period from 2019-01-01 to 2019-12-31.
+
+period_state is 'failed' if tasks in this interval failed or 'succeeded' if tasks in this interval succeeded.
+Interval of days are retrieved as start_date and end_date.
+
+Return the result table ordered by start_date.
+*/
+
+Drop table if exists Failed;
+Drop table if exists Succeeded;
+Create table If Not Exists Failed (fail_date date);
+Create table If Not Exists Succeeded (success_date date);
+Truncate table Failed;
+insert into Failed (fail_date) values ('2018-12-28');
+insert into Failed (fail_date) values ('2018-12-29');
+insert into Failed (fail_date) values ('2019-01-04');
+insert into Failed (fail_date) values ('2019-01-05');
+Truncate table Succeeded;
+insert into Succeeded (success_date) values ('2018-12-30');
+insert into Succeeded (success_date) values ('2018-12-31');
+insert into Succeeded (success_date) values ('2019-01-01');
+insert into Succeeded (success_date) values ('2019-01-02');
+insert into Succeeded (success_date) values ('2019-01-03');
+insert into Succeeded (success_date) values ('2019-01-06');
+
+SELECT *
+FROM Failed;
+
+SELECT *
+FROM Succeeded;
+
+WITH IntFailed AS (
+    SELECT fail_date AS date, 0 AS state, TO_DAYS(fail_date) - ROW_NUMBER() OVER(ORDER BY fail_date) AS diff
+    FROM Failed
+    WHERE fail_date >= '2019-01-01' AND fail_date <= '2019-12-31'
+    ORDER BY fail_date ASC
+),
+IntSucceeded AS (
+    SELECT success_date AS date, 0 AS state, TO_DAYS(success_date) - ROW_NUMBER() OVER(ORDER BY success_date) AS diff
+    FROM Succeeded
+    WHERE success_date >= '2019-01-01' AND success_date <= '2019-12-31'
+    ORDER BY success_date ASC
+)
+SELECT 'failed' AS period_state, MIN(date) AS start_date, MAX(date) AS end_date
+FROM IntFailed
+GROUP BY diff
+UNION ALL
+SELECT 'succeeded' AS period_state, MIN(date) AS start_date, MAX(date) AS end_date
+FROM IntSucceeded
+GROUP BY diff
+ORDER BY start_date;
+
+/*
+Using PARTITION BY instead
+*/
+
+WITH Combined AS (
+  SELECT fail_date AS date, 'failed' AS state
+  FROM Failed
+  WHERE fail_date BETWEEN '2019-01-01' AND '2019-12-31'
+  
+  UNION ALL
+  
+  SELECT success_date AS date, 'succeeded' AS state
+  FROM Succeeded
+  WHERE success_date BETWEEN '2019-01-01' AND '2019-12-31'
+),
+Numbered AS (
+  SELECT *,
+         TO_DAYS(date) - ROW_NUMBER() OVER (PARTITION BY state ORDER BY date) AS diff
+  FROM Combined
+)
+SELECT state AS period_state, MIN(date) AS start_date, MAX(date) AS end_date
+FROM Numbered
+GROUP BY state, diff
+ORDER BY start_date;
+
+
+Drop table if exists Failed;
+Drop table if exists Succeeded;
+
+
