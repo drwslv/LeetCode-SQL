@@ -471,3 +471,48 @@ Drop table if exists RequestAccepted;
 
 
 
+/* 1107. New Users Daily Count [M]
+Write a solution to report for every date within at most 90 days from today,
+the number of users that logged in for the first time on that date. Assume today is 2019-06-30.
+
+Return the result table in any order.
+*/
+
+Drop table if exists Traffic;
+Create table If Not Exists Traffic (user_id int, activity ENUM('login', 'logout', 'jobs', 'groups', 'homepage'), activity_date date);
+Truncate table Traffic;
+insert into Traffic (user_id, activity, activity_date) values ('1', 'login', '2019-05-01');
+insert into Traffic (user_id, activity, activity_date) values ('1', 'homepage', '2019-05-01');
+insert into Traffic (user_id, activity, activity_date) values ('1', 'logout', '2019-05-01');
+insert into Traffic (user_id, activity, activity_date) values ('2', 'login', '2019-06-21');
+insert into Traffic (user_id, activity, activity_date) values ('2', 'logout', '2019-06-21');
+insert into Traffic (user_id, activity, activity_date) values ('3', 'login', '2019-01-01');
+insert into Traffic (user_id, activity, activity_date) values ('3', 'jobs', '2019-01-01');
+insert into Traffic (user_id, activity, activity_date) values ('3', 'logout', '2019-01-01');
+insert into Traffic (user_id, activity, activity_date) values ('4', 'login', '2019-06-21');
+insert into Traffic (user_id, activity, activity_date) values ('4', 'groups', '2019-06-21');
+insert into Traffic (user_id, activity, activity_date) values ('4', 'logout', '2019-06-21');
+insert into Traffic (user_id, activity, activity_date) values ('5', 'login', '2019-03-01');
+insert into Traffic (user_id, activity, activity_date) values ('5', 'logout', '2019-03-01');
+insert into Traffic (user_id, activity, activity_date) values ('5', 'login', '2019-06-21');
+insert into Traffic (user_id, activity, activity_date) values ('5', 'logout', '2019-06-21');
+
+SELECT *
+FROM Traffic;
+
+WITH FirstLogins AS (
+    SELECT user_id, MIN(activity_date) AS login_date
+    FROM Traffic
+    WHERE activity = 'login'
+    GROUP BY user_id
+)
+SELECT login_date, COUNT(user_id) AS user_count
+FROM FirstLogins
+WHERE login_date >= DATE_SUB('2019-06-30', INTERVAL 90 DAY)
+    AND login_date <= DATE_ADD('2019-06-30', INTERVAL 90 DAY)
+GROUP BY login_date;
+
+
+Drop table if exists Traffic;
+
+
