@@ -744,10 +744,12 @@ insert into Followers (user_id, follower_id) values ('1', '0');
 insert into Followers (user_id, follower_id) values ('2', '0');
 insert into Followers (user_id, follower_id) values ('2', '1');
 
-SELECT *
-FROM Followers;
-
-
+SELECT user_id, COUNT(*) AS followers_count
+FROM Followers
+GROUP BY user_id
+ORDER BY user_id ASC;
 
 
 Drop table if exists Followers;
+
+
