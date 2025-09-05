@@ -729,7 +729,6 @@ ORDER BY content_id;
 Drop table if exists user_content;
 
 
-
 /* 1729. Find Followers Count [E]
 Write a solution that will, for each user, return the number of followers.
 
@@ -751,5 +750,42 @@ ORDER BY user_id ASC;
 
 
 Drop table if exists Followers;
+
+
+
+/* 1795. Rearrange Products Table [E]
+Write a solution to rearrange the Products table so that each row has (product_id, store, price).
+If a product is not available in a store, do not include a row with that product_id and store combination in the result table.
+
+Return the result table in any order.
+*/
+
+Drop table if exists Products;
+Create table If Not Exists Products (product_id int, store1 int, store2 int, store3 int);
+Truncate table Products;
+insert into Products (product_id, store1, store2, store3) values ('0', '95', '100', '105');
+insert into Products (product_id, store1, store2, store3) values ('1', '70', NULL, '80');
+
+SELECT *
+FROM Products;
+
+WITH Products_long AS (
+    SELECT product_id, 'store1' AS store, store1 AS price
+    FROM Products
+    UNION ALL
+    SELECT product_id, 'store2' AS store, store2 AS price
+    FROM Products
+    UNION ALL
+    SELECT product_id, 'store3' AS store, store3 AS price
+    FROM Products
+)
+SELECT *
+FROM Products_long
+WHERE price IS NOT NULL;
+
+
+Drop table if exists Products;
+
+
 
 
