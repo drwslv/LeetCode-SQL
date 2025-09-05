@@ -612,7 +612,7 @@ Drop table if exists ActorDirector;
 Create table If Not Exists ActorDirector (actor_id int, director_id int, timestamp int);
 Truncate table ActorDirector;
 insert into ActorDirector (actor_id, director_id, timestamp) values ('1', '1', '0');
-insert into ActorDirector (actor_id, director_id, timestamp) values ('1', '1', '1');
+insert into ActorDirector (actor_id, dirsector_id, timestamp) values ('1', '1', '1');
 insert into ActorDirector (actor_id, director_id, timestamp) values ('1', '1', '2');
 insert into ActorDirector (actor_id, director_id, timestamp) values ('1', '2', '3');
 insert into ActorDirector (actor_id, director_id, timestamp) values ('1', '2', '4');
@@ -630,3 +630,124 @@ HAVING COUNT(*) >= 3;
 Drop table if exists ActorDirector;
 
 
+
+/* 3374. First Letter Capitalization II [H]
+Write a solution to transform the text in the content_text column by applying the following rules:
+
+* Convert the first letter of each word to uppercase and the remaining letters to lowercase
+
+* Special handling for words containing special characters:
+  * For words connected with a hyphen -, both parts should be capitalized (e.g., top-rated → Top-Rated)
+
+* All other formatting and spacing should remain unchanged
+
+Return the result table that includes both the original content_text and the modified text following the above rules.
+*/
+
+Drop table if exists user_content;
+CREATE TABLE If not exists user_content (
+    content_id INT,
+    content_text VARCHAR(255)
+);
+Truncate table user_content;
+insert into user_content (content_id, content_text) values ('1', 'hello world of SQL');
+insert into user_content (content_id, content_text) values ('2', 'the QUICK-brown fox');
+insert into user_content (content_id, content_text) values ('3', 'modern-day DATA science');
+insert into user_content (content_id, content_text) values ('4', 'web-based FRONT-end development');
+
+SELECT *
+FROM user_content;
+
+-- With help from ChatGPT
+WITH RECURSIVE
+-- 1) Make hyphens their own tokens
+prep AS (
+  SELECT
+    content_id,
+    content_text,
+    REPLACE(content_text, '-', ' - ') AS new_text
+  FROM user_content
+),
+
+-- 2) Count tokens = spaces + 1 (handles empty / single-word too)
+tok_count AS (
+  SELECT
+    content_id,
+    content_text,
+    new_text,
+    1 + CHAR_LENGTH(new_text) - CHAR_LENGTH(REPLACE(new_text, ' ', '')) AS token_count
+  FROM prep
+),
+
+-- 3) Build 1..token_count per row
+seq AS (
+  SELECT content_id, content_text, new_text, 1 AS n, token_count
+  FROM tok_count
+  UNION ALL
+  SELECT content_id, content_text, new_text, n + 1, token_count
+  FROM seq
+  WHERE n < token_count
+),
+
+-- 4) Extract the n-th token, in order
+tokens AS (
+  SELECT
+    content_id,
+    content_text,
+    n AS ordinal,
+    TRIM(SUBSTRING_INDEX(SUBSTRING_INDEX(new_text, ' ', n), ' ', -1)) AS token
+  FROM seq
+),
+
+-- 5) Title-case each token (keep '-' as a literal hyphen)
+converted AS (
+  SELECT
+    content_id,
+    content_text,
+    ordinal,
+    CASE
+      WHEN token = '-' THEN '-'
+      WHEN token = ''  THEN ''
+      ELSE CONCAT(UPPER(LEFT(token, 1)), LOWER(SUBSTRING(token, 2)))
+    END AS converted
+  FROM tokens
+)
+
+-- 6) Reassemble and clean spaces around hyphens
+SELECT
+  content_id,
+  content_text AS original_text,
+  REPLACE(
+    GROUP_CONCAT(converted ORDER BY ordinal SEPARATOR ' '),
+    ' - ', '-'
+  ) AS converted_text
+FROM converted
+GROUP BY content_id, original_text
+ORDER BY content_id;
+
+
+Drop table if exists user_content;
+
+
+
+/* 1729. Find Followers Count [E]
+Write a solution that will, for each user, return the number of followers.
+
+Return the result table ordered by user_id in ascending order.
+*/
+
+Drop table if exists Followers;
+Create table If Not Exists Followers(user_id int, follower_id int);
+Truncate table Followers;
+insert into Followers (user_id, follower_id) values ('0', '1');
+insert into Followers (user_id, follower_id) values ('1', '0');
+insert into Followers (user_id, follower_id) values ('2', '0');
+insert into Followers (user_id, follower_id) values ('2', '1');
+
+SELECT *
+FROM Followers;
+
+
+
+
+Drop table if exists Followers;
