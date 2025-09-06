@@ -855,3 +855,102 @@ GROUP BY stock_name;
 
 Drop table if exists Stocks;
 
+
+/* 607. Sales Person [E]
+Write a solution to find the names of all the salespersons who did not have any orders related to the company with the name "RED".
+
+Return the result table in any order.
+*/
+
+Drop table if exists SalesPerson;
+Drop table if exists Company;
+Drop table if exists Orders;
+Create table If Not Exists SalesPerson (sales_id int, name varchar(255), salary int, commission_rate int, hire_date date);
+Create table If Not Exists Company (com_id int, name varchar(255), city varchar(255));
+Create table If Not Exists Orders (order_id int, order_date date, com_id int, sales_id int, amount int);
+Truncate table SalesPerson;
+insert into SalesPerson (sales_id, name, salary, commission_rate, hire_date) values ('1', 'John', '100000', '6', '2006-4-1');
+insert into SalesPerson (sales_id, name, salary, commission_rate, hire_date) values ('2', 'Amy', '12000', '5', '2010-5-1');
+insert into SalesPerson (sales_id, name, salary, commission_rate, hire_date) values ('3', 'Mark', '65000', '12', '2008-12-25');
+insert into SalesPerson (sales_id, name, salary, commission_rate, hire_date) values ('4', 'Pam', '25000', '25', '2005-1-1');
+insert into SalesPerson (sales_id, name, salary, commission_rate, hire_date) values ('5', 'Alex', '5000', '10', '2007-2-3');
+Truncate table Company;
+insert into Company (com_id, name, city) values ('1', 'RED', 'Boston');
+insert into Company (com_id, name, city) values ('2', 'ORANGE', 'New York');
+insert into Company (com_id, name, city) values ('3', 'YELLOW', 'Boston');
+insert into Company (com_id, name, city) values ('4', 'GREEN', 'Austin');
+Truncate table Orders;
+insert into Orders (order_id, order_date, com_id, sales_id, amount) values ('1', '2014-1-1', '3', '4', '10000');
+insert into Orders (order_id, order_date, com_id, sales_id, amount) values ('2', '2014-2-1', '4', '5', '5000');
+insert into Orders (order_id, order_date, com_id, sales_id, amount) values ('3', '2014-3-1', '1', '1', '50000');
+insert into Orders (order_id, order_date, com_id, sales_id, amount) values ('4', '2014-3-1', '1', '4', '25000');
+
+SELECT *
+FROM SalesPerson;
+
+SELECT *
+FROM Company;
+
+SELECT *
+FROM Orders;
+
+SELECT name
+FROM SalesPerson
+WHERE sales_id NOT IN (
+    SELECT sales_id
+    FROM Orders O
+    JOIN Company C
+        USING(com_id)
+    WHERE C.name = 'RED'
+);
+
+Drop table if exists SalesPerson;
+Drop table if exists Company;
+Drop table if exists Orders;
+
+
+/* 569. Median Employee Salary [H]
+Write a solution to find the rows that contain the median salary of each company. While calculating the median,
+when you sort the salaries of the company, break the ties by id.
+
+Return the result table in any order.
+*/
+
+Drop table if exists Employee;
+Create table If Not Exists Employee (id int, company varchar(255), salary int);
+Truncate table Employee;
+insert into Employee (id, company, salary) values ('1', 'A', '2341');
+insert into Employee (id, company, salary) values ('2', 'A', '341');
+insert into Employee (id, company, salary) values ('3', 'A', '15');
+insert into Employee (id, company, salary) values ('4', 'A', '15314');
+insert into Employee (id, company, salary) values ('5', 'A', '451');
+insert into Employee (id, company, salary) values ('6', 'A', '513');
+insert into Employee (id, company, salary) values ('7', 'B', '15');
+insert into Employee (id, company, salary) values ('8', 'B', '13');
+insert into Employee (id, company, salary) values ('9', 'B', '1154');
+insert into Employee (id, company, salary) values ('10', 'B', '1345');
+insert into Employee (id, company, salary) values ('11', 'B', '1221');
+insert into Employee (id, company, salary) values ('12', 'B', '234');
+insert into Employee (id, company, salary) values ('13', 'C', '2345');
+insert into Employee (id, company, salary) values ('14', 'C', '2645');
+insert into Employee (id, company, salary) values ('15', 'C', '2645');
+insert into Employee (id, company, salary) values ('16', 'C', '2652');
+insert into Employee (id, company, salary) values ('17', 'C', '65');
+
+SELECT *
+FROM Employee;
+
+WITH Ordered AS (
+    SELECT id,
+        company,
+        salary,
+        ROW_NUMBER() OVER(PARTITION BY company ORDER BY salary, id) AS ordinal,
+        COUNT(*) OVER(PARTITION BY company) cnt
+    FROM Employee
+)
+SELECT id, company, salary
+FROM Ordered
+WHERE ordinal IN (FLOOR((cnt + 1) / 2), FLOOR((cnt + 2) / 2));
+
+Drop table if exists Employee;
+
