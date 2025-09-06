@@ -783,9 +783,36 @@ SELECT *
 FROM Products_long
 WHERE price IS NOT NULL;
 
-
 Drop table if exists Products;
 
 
+/* 619. Biggest Single Number [E]
+A single number is a number that appeared only once in the MyNumbers table.
+
+Find the largest single number. If there is no single number, report null.
+*/
+
+Drop table if exists MyNumbers;
+Create table If Not Exists MyNumbers (num int);
+Truncate table MyNumbers;
+insert into MyNumbers (num) values ('8');
+insert into MyNumbers (num) values ('8');
+insert into MyNumbers (num) values ('3');
+insert into MyNumbers (num) values ('3');
+insert into MyNumbers (num) values ('1');
+insert into MyNumbers (num) values ('4');
+insert into MyNumbers (num) values ('5');
+insert into MyNumbers (num) values ('6');
+
+SELECT (
+    SELECT num
+    FROM MyNumbers
+    GROUP BY num
+    HAVING COUNT(*) = 1
+    ORDER BY num DESC
+    LIMIT 1
+) AS num;
+
+Drop table if exists MyNumbers;
 
 
