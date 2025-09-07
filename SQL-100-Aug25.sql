@@ -982,7 +982,53 @@ FROM Logins
 WHERE YEAR(time_stamp) = '2020'
 GROUP BY user_id;
 
-
 Drop table if exists Logins;
+
+
+/* 603. Consecutive Available Seats [E]
+Find all the consecutive available seats in the cinema.
+
+Return the result table ordered by seat_id in ascending order.
+
+The test cases are generated so that more than two seats are consecutively available.
+*/
+
+Drop table if exists Cinema;
+Create table If Not Exists Cinema (seat_id int primary key auto_increment, free bool);
+Truncate table Cinema;
+insert into Cinema (seat_id, free) values ('1', '1');
+insert into Cinema (seat_id, free) values ('2', '0');
+insert into Cinema (seat_id, free) values ('3', '1');
+insert into Cinema (seat_id, free) values ('4', '1');
+insert into Cinema (seat_id, free) values ('5', '1');
+
+SELECT *
+FROM Cinema;
+
+WITH Free AS (
+    SELECT *
+    FROM Cinema
+    WHERE free = 1
+),
+Labeled AS (
+    SELECT *, seat_id - ROW_NUMBER() OVER(ORDER BY seat_id) AS grp_id
+    FROM Free
+),
+Grouped AS (
+    SELECT grp_id
+    FROM Labeled
+    GROUP BY grp_id
+    HAVING COUNT(*)  > 1
+)
+SELECT seat_id
+FROM Labeled
+JOIN Grouped USING(grp_id);
+
+
+Drop table if exists Cinema;
+
+
+
+
 
 
