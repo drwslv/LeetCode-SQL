@@ -49,8 +49,10 @@ window_function(...) OVER (
 
 LAG(var, 1)
 LEAD(var, 1)
-RANK() OVER (PARTITION BY var / ORDER BY var)
-SUM(var) OVER (ORDER BY var)
+RANK() OVER(PARTITION BY var ORDER BY var)
+ROW_NUMBER() OVER(...)
+SUM(var) OVER(...)
+COUNT(var) OVER (...)
 
 
 -Using WITH keyword:
