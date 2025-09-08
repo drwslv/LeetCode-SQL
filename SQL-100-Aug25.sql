@@ -1028,7 +1028,54 @@ JOIN Grouped USING(grp_id);
 Drop table if exists Cinema;
 
 
+/* 571. Find Median Given Frequency of Numbers [H]
+The median is the value separating the higher half from the lower half of a data sample.
 
+Write a solution to report the median of all the numbers in the database after decompressing the Numbers table.
+Round the median to one decimal point.
+*/
+
+Drop table if exists Numbers;
+Create table If Not Exists Numbers (num int, frequency int);
+Truncate table Numbers;
+insert into Numbers (num, frequency) values ('0', '7');
+insert into Numbers (num, frequency) values ('1', '1');
+insert into Numbers (num, frequency) values ('2', '3');
+insert into Numbers (num, frequency) values ('3', '1');
+
+Drop table if exists Numbers;
+Create table If Not Exists Numbers (num int, frequency int);
+Truncate table Numbers;
+insert into Numbers (num, frequency) values ('1', '3');
+insert into Numbers (num, frequency) values ('2', '3');
+
+SELECT *
+FROM Numbers;
+
+WITH CTE AS (
+    SELECT *,
+        SUM(frequency) OVER(ORDER BY num) AS upper_bound,
+        (
+            SELECT FLOOR((SUM(frequency)+1)/2)
+            FROM Numbers
+        ) AS med1,
+        (
+            SELECT FLOOR((SUM(frequency)+2)/2)
+            FROM Numbers
+        ) AS med2
+    FROM Numbers
+),
+    CTE2 AS (
+    SELECT *,
+        IFNULL(LAG(upper_bound) OVER(ORDER BY num) + 1, 1) AS lower_bound
+    FROM CTE
+)
+SELECT ROUND(AVG(num),1) AS median
+FROM CTE2
+WHERE (med1 >= lower_bound AND med1 <= upper_bound)
+    OR (med2 >= lower_bound AND med2 <= upper_bound);
+
+Drop table if exists Numbers;
 
 
 
