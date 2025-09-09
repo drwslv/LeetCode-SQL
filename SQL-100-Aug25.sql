@@ -1148,7 +1148,7 @@ FROM Odds
 LEFT JOIN Evens USING(transaction_date)
 ORDER BY transaction_date ASC;
 
--- Better:
+-- Better
 SELECT transaction_date, 
     SUM(CASE WHEN amount%2 != 0 THEN amount ELSE 0 END) AS odd_sum,
     SUM(CASE WHEN amount%2 = 0 THEN amount ELSE 0 END) AS even_sum
@@ -1215,4 +1215,109 @@ WHERE conditions LIKE 'DIAB1%'
 
 Drop table if exists Patients;
 
+
+/* 579. Find Cumulative Salary of an Employee [H]
+Write a solution to calculate the cumulative salary summary for every employee in a single unified table.
+
+The cumulative salary summary for an employee can be calculated as follows:
+
+* For each month that the employee worked, sum up the salaries in that month and the previous two months.
+    This is their 3-month sum for that month. If an employee did not work for the company in previous months, their effective salary for those months is 0.
+
+* Do not include the 3-month sum for the most recent month that the employee worked for in the summary.
+
+* Do not include the 3-month sum for any month the employee did not work.
+
+Return the result table ordered by id in ascending order. In case of a tie, order it by month in descending order.
+*/
+
+Drop table if exists Employee;
+Create table If Not Exists Employee (id int, month int, salary int);
+Truncate table Employee;
+insert into Employee (id, month, salary) values ('1', '1', '20');
+insert into Employee (id, month, salary) values ('2', '1', '20');
+insert into Employee (id, month, salary) values ('1', '2', '30');
+insert into Employee (id, month, salary) values ('2', '2', '30');
+insert into Employee (id, month, salary) values ('3', '2', '40');
+insert into Employee (id, month, salary) values ('1', '3', '40');
+insert into Employee (id, month, salary) values ('3', '3', '60');
+insert into Employee (id, month, salary) values ('1', '4', '60');
+insert into Employee (id, month, salary) values ('3', '4', '70');
+insert into Employee (id, month, salary) values ('1', '7', '90');
+insert into Employee (id, month, salary) values ('1', '8', '90');
+
+SELECT *
+FROM Employee;
+
+-- This version incorrect; works for previous 3 months as record, not previoius 3 months by month number
+WITH CTE AS (
+    SELECT id, month, SUM(salary) AS salary,
+        MAX(month) OVER(PARTITION BY id) AS max_month
+    FROM Employee
+    GROUP BY id, month
+),
+CTE2 AS (
+    SELECT id, month, salary
+    FROM CTE
+    WHERE month != max_month
+),
+Full AS (
+    SELECT *,
+        LAG(month, 1) OVER(PARTITION BY id) AS month_1,
+        LAG(month, 2) OVER(PARTITION BY id) AS month_2
+    FROM CTE2
+)
+SELECT F.id, F.month, F.salary, F.month_1, F.month_2, L1.salary, L2.salary
+FROM Full F
+LEFT JOIN Full L1
+ON F.id = L1.id AND F.month_1 = L1.month
+LEFT JOIN Full L2
+ON F.id = L2.id AND F.month_2 = L2.month;
+
+-- This version is correct
+WITH CTE AS (
+    SELECT id, month, SUM(salary) AS salary,
+        MAX(month) OVER(PARTITION BY id) AS max_month
+    FROM Employee
+    GROUP BY id, month
+),
+CTE2 AS (
+    SELECT id, month, salary
+    FROM CTE
+    WHERE month != max_month
+)
+SELECT M.id AS id, M.month AS month, M.salary + IFNULL(M1.salary,0) + IFNULL(M2.salary,0) AS salary
+FROM CTE2 M
+LEFT JOIN CTE2 M1
+    ON M.id = M1.id AND M.month = M1.month + 1
+LEFT JOIN CTE2 M2
+    ON M.id = M2.id AND M.month = M2.month + 2
+ORDER BY M.id ASC, M.month DESC;
+-- M.salary AS salary, IFNULL(M1.salary,0) AS salary_1, IFNULL(M2.salary,0) AS salary_2
+
+-- Even better
+SELECT
+    E1.id,
+    E1.month,
+    (IFNULL(E1.salary, 0) + IFNULL(E2.salary, 0) + IFNULL(E3.salary, 0)) AS Salary
+FROM
+    (SELECT
+        id, MAX(month) AS month
+    FROM
+        Employee
+    GROUP BY id
+    HAVING COUNT(*) > 1) AS maxmonth
+        LEFT JOIN
+    Employee E1 ON (maxmonth.id = E1.id
+        AND maxmonth.month > E1.month)
+        LEFT JOIN
+    Employee E2 ON (E2.id = E1.id
+        AND E2.month = E1.month - 1)
+        LEFT JOIN
+    Employee E3 ON (E3.id = E1.id
+        AND E3.month = E1.month - 2)
+ORDER BY id ASC , month DESC
+;
+
+Drop table if exists Employee;
 
