@@ -1104,5 +1104,60 @@ FROM Activity;
 Drop table if exists Activity;
 
 
+/* 3220. Odd and Even Transactions [M]
+Write a solution to find the sum of amounts for odd and even transactions for each day.
+If there are no odd or even transactions for a specific date, display as 0.
+
+Return the result table ordered by transaction_date in ascending order.
+*/
+
+Drop table if exists transactions;
+Create table if not exists transactions ( transaction_id int, amount int, transaction_date date);
+Truncate table transactions;
+insert into transactions (transaction_id, amount, transaction_date) values ('1', '150', '2024-07-01');
+insert into transactions (transaction_id, amount, transaction_date) values ('2', '200', '2024-07-01');
+insert into transactions (transaction_id, amount, transaction_date) values ('3', '75', '2024-07-01');
+insert into transactions (transaction_id, amount, transaction_date) values ('4', '300', '2024-07-02');
+insert into transactions (transaction_id, amount, transaction_date) values ('5', '50', '2024-07-02');
+insert into transactions (transaction_id, amount, transaction_date) values ('6', '120', '2024-07-03');
+
+SELECT *
+FROM transactions;
+
+WITH CTE AS (
+    SELECT *, amount%2 as odd
+    FROM transactions
+),
+Evens AS (
+    SELECT transaction_date, SUM(amount) AS even_sum
+    FROM CTE
+    WHERE odd = 0
+    GROUP BY transaction_date
+),
+Odds AS (
+    SELECT transaction_date, SUM(amount) AS odd_sum
+    FROM CTE
+    WHERE odd = 1
+    GROUP BY transaction_date)
+SELECT transaction_date, IFNULL(odd_sum,0) AS odd_sum, IFNULL(even_sum,0) AS even_sum
+FROM Evens
+LEFT JOIN Odds USING(transaction_date)
+UNION
+SELECT transaction_date, IFNULL(odd_sum,0) AS odd_sum, IFNULL(even_sum,0) AS even_sum
+FROM Odds
+LEFT JOIN Evens USING(transaction_date)
+ORDER BY transaction_date ASC;
+
+-- Better:
+SELECT transaction_date, 
+    SUM(CASE WHEN amount%2 != 0 THEN amount ELSE 0 END) AS odd_sum,
+    SUM(CASE WHEN amount%2 = 0 THEN amount ELSE 0 END) AS even_sum
+FROM transactions
+GROUP BY transaction_date
+ORDER BY transaction_date;
+
+Drop table if exists transactions;
+
+
 
 
