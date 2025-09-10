@@ -1387,6 +1387,67 @@ FROM Activities
 GROUP BY sell_date
 ORDER BY sell_date;
 
-
-
 Drop table if exists Activities;
+
+
+/* 615. Average Salary: Departments VS Company [H]
+Find the comparison result (higher/lower/same) of the average salary of employees in a department to the company's average salary.
+
+Return the result table in any order.
+*/
+
+Drop table if exists Salary;
+Drop table if exists Employee;
+Create table If Not Exists Salary (id int, employee_id int, amount int, pay_date date);
+Create table If Not Exists Employee (employee_id int, department_id int);
+Truncate table Salary;
+insert into Salary (id, employee_id, amount, pay_date) values ('1', '1', '9000', '2017/03/31');
+insert into Salary (id, employee_id, amount, pay_date) values ('2', '2', '6000', '2017/03/31');
+insert into Salary (id, employee_id, amount, pay_date) values ('3', '3', '10000', '2017/03/31');
+insert into Salary (id, employee_id, amount, pay_date) values ('4', '1', '7000', '2017/02/28');
+insert into Salary (id, employee_id, amount, pay_date) values ('5', '2', '6000', '2017/02/28');
+insert into Salary (id, employee_id, amount, pay_date) values ('6', '3', '8000', '2017/02/28');
+Truncate table Employee;
+insert into Employee (employee_id, department_id) values ('1', '1');
+insert into Employee (employee_id, department_id) values ('2', '2');
+insert into Employee (employee_id, department_id) values ('3', '2');
+
+SELECT *
+FROM Salary;
+
+SELECT *
+FROM Employee;
+
+WITH SalEmp AS (
+    SELECT *, DATE_FORMAT(pay_date, '%Y-%m') AS pay_month
+    FROM Salary
+    JOIN Employee
+        USING (employee_id)
+),
+DepGrp AS (
+    SELECT pay_month, department_id, AVG(amount) AS salary_dep
+    FROM SalEmp
+    GROUP BY pay_month, department_id
+),
+ComGrp AS(
+    SELECT pay_month, AVG(amount) AS salary_com
+    FROM SalEmp
+    GROUP BY pay_month
+)
+SELECT pay_month, department_id,
+    CASE
+        WHEN salary_dep > salary_com THEN 'higher'
+        WHEN salary_dep < salary_com THEN 'lower'
+        WHEN salary_dep = salary_com THEN 'same'
+    END AS comparison
+FROM DepGrp
+LEFT JOIN ComGrp USING(pay_month);
+
+
+
+
+
+
+Drop table if exists Salary;
+Drop table if exists Employee;
+
