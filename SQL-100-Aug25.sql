@@ -1443,11 +1443,54 @@ SELECT pay_month, department_id,
 FROM DepGrp
 LEFT JOIN ComGrp USING(pay_month);
 
-
-
-
-
-
 Drop table if exists Salary;
 Drop table if exists Employee;
 
+
+/* 1965. Employees With Missing Information [E]
+Write a solution to report the IDs of all the employees with missing information. The information of an employee is missing if:
+
+* The employee's name is missing, or
+
+* The employee's salary is missing.
+
+Return the result table ordered by employee_id in ascending order.
+*/
+
+Drop table if exists Employees;
+Drop table if exists Salaries;
+Create table If Not Exists Employees (employee_id int, name varchar(30));
+Create table If Not Exists Salaries (employee_id int, salary int);
+Truncate table Employees;
+insert into Employees (employee_id, name) values ('2', 'Crew');
+insert into Employees (employee_id, name) values ('4', 'Haven');
+insert into Employees (employee_id, name) values ('5', 'Kristian');
+Truncate table Salaries;
+insert into Salaries (employee_id, salary) values ('5', '76071');
+insert into Salaries (employee_id, salary) values ('1', '22517');
+insert into Salaries (employee_id, salary) values ('4', '63539');
+
+SELECT *
+FROM Employees;
+
+SELECT *
+FROM Salaries;
+
+WITH CTE AS (
+    SELECT employee_id, name, salary, IF(salary IS NULL OR name IS NULL, 1, 0) AS missing
+    FROM Employees
+    LEFT JOIN Salaries USING(employee_id)
+    UNION
+    SELECT employee_id, name, salary, IF(salary IS NULL OR name IS NULL, 1, 0) AS missing
+    FROM Employees
+    RIGHT JOIN Salaries USING(employee_id)
+)
+SELECT employee_id
+FROM CTE
+WHERE missing = 1
+ORDER BY employee_id ASC;
+
+
+
+Drop table if exists Employees;
+Drop table if exists Salaries;
