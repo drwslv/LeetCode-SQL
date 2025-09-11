@@ -1607,4 +1607,49 @@ Drop table if exists Candidate;
 Drop table if exists Vote;
 
 
+/* 578. Get Highest Answer Rate Question [M]
+The answer rate for a question is the number of times a user answered the question by the number of times a user showed the question.
+
+Write a solution to report the question that has the highest answer rate.
+If multiple questions have the same maximum answer rate, report the question with the smallest question_id.
+*/
+
+Drop table if exists SurveyLog;
+Create table If Not Exists SurveyLog (id int, action varchar(255), question_id int, answer_id int, q_num int, timestamp int);
+Truncate table SurveyLog;
+insert into SurveyLog (id, action, question_id, answer_id, q_num, timestamp) values ('5', 'show', '285', NULL, '1', '123');
+insert into SurveyLog (id, action, question_id, answer_id, q_num, timestamp) values ('5', 'answer', '285', '124124', '1', '124');
+insert into SurveyLog (id, action, question_id, answer_id, q_num, timestamp) values ('5', 'show', '369', NULL, '2', '125');
+insert into SurveyLog (id, action, question_id, answer_id, q_num, timestamp) values ('5', 'skip', '369', NULL, '2', '126');
+
+SELECT *
+FROM SurveyLog;
+
+WITH Shown AS (
+    SELECT question_id, COUNT(*) AS show_cnt
+    FROM SurveyLog
+    WHERE action = 'show'
+    GROUP BY question_id
+),
+Answered AS (
+    SELECT question_id, COUNT(*) AS answer_cnt
+    FROM SurveyLog
+    WHERE action = 'answer'
+    GROUP BY question_id
+),
+    CTE AS (
+    SELECT *, IFNULL(answer_cnt, 0)/show_cnt AS ratio
+    FROM Shown
+    LEFT JOIN Answered USING(question_id)
+)
+SELECT question_id as survey_log
+FROM CTE
+WHERE ratio = (
+    SELECT MAX(ratio)
+    FROM CTE
+)
+ORDER BY question_id ASC
+LIMIT 1;
+
+Drop table if exists SurveyLog;
 
