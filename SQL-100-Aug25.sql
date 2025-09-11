@@ -1555,3 +1555,56 @@ ORDER BY employee_id;
 Drop table if exists Employees;
 
 
+/* 574. Winning Candidate [M]
+Write a solution to report the name of the winning candidate (i.e., the candidate who got the largest number of votes).
+
+The test cases are generated so that exactly one candidate wins the elections.
+*/
+
+Drop table if exists Candidate;
+Drop table if exists Vote;
+Create table If Not Exists Candidate (id int, name varchar(255));
+Create table If Not Exists Vote (id int, candidateId int);
+Truncate table Candidate;
+insert into Candidate (id, name) values ('1', 'A');
+insert into Candidate (id, name) values ('2', 'B');
+insert into Candidate (id, name) values ('3', 'C');
+insert into Candidate (id, name) values ('4', 'D');
+insert into Candidate (id, name) values ('5', 'E');
+Truncate table Vote;
+insert into Vote (id, candidateId) values ('1', '2');
+insert into Vote (id, candidateId) values ('2', '4');
+insert into Vote (id, candidateId) values ('3', '3');
+insert into Vote (id, candidateId) values ('4', '2');
+insert into Vote (id, candidateId) values ('5', '5');
+
+SELECT *
+FROM Candidate;
+
+SELECT *
+FROM Vote;
+
+WITH VotesGrp AS (
+    SELECT candidateId, COUNT(id) AS votes
+    FROM Vote
+    GROUP BY candidateId
+),
+VotesWin AS (
+    SELECT *
+    FROM VotesGrp VG
+    WHERE votes = (
+        SELECT MAX(votes)
+        FROM VotesGrp
+    )
+)
+SELECT name
+FROM VotesWin VW
+LEFT JOIN Candidate C
+    ON VW.candidateId = C.id;
+
+
+Drop table if exists Candidate;
+Drop table if exists Vote;
+
+
+
