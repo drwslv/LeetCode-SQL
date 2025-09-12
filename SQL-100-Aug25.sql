@@ -1694,3 +1694,45 @@ Drop table if exists Student;
 Drop table if exists Department;
 
 
+/* 612. Shortest Distance in a Plane [M]
+The distance between two points p1(x1, y1) and p2(x2, y2) is sqrt((x2 - x1)2 + (y2 - y1)2).
+
+Write a solution to report the shortest distance between any two points from the Point2D table. Round the distance to two decimal points.
+*/
+
+Drop table if exists Point2D;
+Create Table If Not Exists Point2D (x int not null, y int not null);
+Truncate table Point2D;
+insert into Point2D (x, y) values ('-1', '-1');
+insert into Point2D (x, y) values ('0', '0');
+insert into Point2D (x, y) values ('-1', '-2');
+
+SELECT *
+FROM Point2D;
+
+WITH Combos AS (
+    SELECT PA.x AS xA, PA.y as yA, PB.x AS xB, PB.y as yB
+    FROM Point2D PA, Point2D PB
+    WHERE (PA.x , PA.y ) != (PB.x, PB.y)
+),
+Calc AS (
+    SELECT SQRT(POW((xB - xA) + 0.0, 2) + POW((yB - yA) + 0.0, 2)) AS dist
+    FROM Combos
+)
+SELECT ROUND(MIN(dist),2) as shortest
+from Calc;
+
+-- Better
+
+SELECT
+    ROUND(SQRT(MIN((POW(p1.x - p2.x, 2) + POW(p1.y - p2.y, 2)))),2) AS shortest
+FROM
+    point_2d p1
+        JOIN
+    point_2d p2 ON (p1.x <= p2.x AND p1.y < p2.y)
+        OR (p1.x <= p2.x AND p1.y > p2.y)
+        OR (p1.x < p2.x AND p1.y = p2.y)
+;
+
+Drop table if exists Point2D;
+
