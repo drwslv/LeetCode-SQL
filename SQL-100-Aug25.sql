@@ -1653,3 +1653,44 @@ LIMIT 1;
 
 Drop table if exists SurveyLog;
 
+
+/* 580. Count Student Number in Departments [M]
+Write a solution to report the respective department name and number of students majoring in each department for all departments
+in the Department table (even ones with no current students).
+
+Return the result table ordered by student_number in descending order. In case of a tie, order them by dept_name alphabetically.
+*/
+
+Drop table if exists Student;
+Drop table if exists Department;
+Create table If Not Exists Student (student_id int,student_name varchar(45), gender varchar(6), dept_id int);
+Create table If Not Exists Department (dept_id int, dept_name varchar(255));
+Truncate table Student;
+insert into Student (student_id, student_name, gender, dept_id) values ('1', 'Jack', 'M', '1');
+insert into Student (student_id, student_name, gender, dept_id) values ('2', 'Jane', 'F', '1');
+insert into Student (student_id, student_name, gender, dept_id) values ('3', 'Mark', 'M', '2');
+Truncate table Department;
+insert into Department (dept_id, dept_name) values ('1', 'Engineering');
+insert into Department (dept_id, dept_name) values ('2', 'Science');
+insert into Department (dept_id, dept_name) values ('3', 'Law');
+
+SELECT *
+FROM Student;
+
+SELECT *
+FROM Department;
+
+WITH StuGrp AS (
+    SELECT dept_id, COUNT(*) AS student_number
+    FROM Student
+    GROUP BY dept_id
+)
+SELECT D.dept_name, IFNULL(S.student_number, 0) AS student_number
+FROM Department D
+LEFT JOIN StuGrp S USING(dept_id)
+ORDER BY student_number DESC, dept_name ASC;
+
+Drop table if exists Student;
+Drop table if exists Department;
+
+
