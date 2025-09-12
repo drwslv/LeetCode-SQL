@@ -1736,3 +1736,30 @@ FROM
 
 Drop table if exists Point2D;
 
+
+/* 613. Shortest Distance in a Line [E]
+Find the shortest distance between any two points from the Point table.
+*/
+
+Drop table if exists Point;
+Create Table If Not Exists Point (x int not null);
+Truncate table Point;
+insert into Point (x) values ('-1');
+insert into Point (x) values ('0');
+insert into Point (x) values ('2');
+
+SELECT *
+FROM Point;
+
+WITH Combos AS (
+    SELECT P1.x AS x1, P2.x as x2
+    FROM Point P1
+    JOIN Point P2
+        ON P1.x < P2.x -- NOTE!
+)
+SELECT MIN(ABS(x2 - x1)) AS shortest -- ABS is not needed, since I selected on x2 > x1
+FROM Combos;
+
+
+
+Drop table if exists Point;
