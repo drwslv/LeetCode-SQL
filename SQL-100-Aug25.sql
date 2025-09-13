@@ -1760,6 +1760,50 @@ WITH Combos AS (
 SELECT MIN(ABS(x2 - x1)) AS shortest -- ABS is not needed, since I selected on x2 > x1
 FROM Combos;
 
-
-
 Drop table if exists Point;
+
+
+/* 614. Second Degree Follower [M]
+A second-degree follower is a user who:
+
+* follows at least one user, and
+
+* is followed by at least one user.
+
+Write a solution to report the second-degree users and the number of their followers.
+
+Return the result table ordered by follower in alphabetical order.
+*/
+
+Drop table if exists Follow;
+Create table If Not Exists Follow (followee varchar(255), follower varchar(255));
+Truncate table Follow;
+insert into Follow (followee, follower) values ('Alice', 'Bob');
+insert into Follow (followee, follower) values ('Bob', 'Cena');
+insert into Follow (followee, follower) values ('Bob', 'Donald');
+insert into Follow (followee, follower) values ('Donald', 'Edward');
+
+SELECT *
+FROM Follow;
+
+WITH Sec AS (
+    SELECT DISTINCT F2.follower AS fol
+    FROM Follow F1
+    JOIN Follow F2
+        ON F1.followee = F2.follower
+),
+TotFol AS (
+    SELECT followee AS fol, COUNT(follower) AS num
+    FROM Follow
+    GROUP BY followee
+)
+SELECT fol as follower, num
+FROM Sec
+JOIN TotFol USING(fol)
+ORDER BY fol ASC;
+
+Drop table if exists Follow;
+
+
+
+
