@@ -1805,5 +1805,86 @@ ORDER BY fol ASC;
 Drop table if exists Follow;
 
 
+/* 618. Students Report By Geography [H]
+A school has students from Asia, Europe, and America.
+
+Write a solution to pivot the continent column in the Student table so that each name is sorted alphabetically
+and displayed underneath its corresponding continent. The output headers should be America, Asia, and Europe, respectively.
+
+The test cases are generated so that the student number from America is not less than either Asia or Europe.
+*/
+
+Drop table if exists Student;
+Create table If Not Exists Student (name varchar(50), continent varchar(7));
+Truncate table Student;
+insert into Student (name, continent) values ('Jane', 'America');
+insert into Student (name, continent) values ('Pascal', 'Europe');
+insert into Student (name, continent) values ('Xi', 'Asia');
+insert into Student (name, continent) values ('Jack', 'America');
+
+SELECT *
+FROM Student;
+
+SELECT continent, GROUP_CONCAT(name) AS names
+FROM Student
+GROUP BY continent;
+
+WITH CTE AS (
+    SELECT ROW_NUMBER() OVER() AS id
+    FROM Student
+),
+Am1 AS (
+    SELECT
+        CASE
+            WHEN continent = 'America' THEN name
+        END AS America
+    FROM Student
+),
+Am2 AS (
+    SELECT America, ROW_NUMBER() OVER(ORDER BY America) AS id
+    FROM Am1
+    WHERE America IS NOT NULL
+    ORDER BY America
+),
+As1 AS (
+    SELECT
+        CASE
+            WHEN continent = 'Asia' THEN name
+        END AS Asia
+    FROM Student
+),
+As2 AS (
+    SELECT Asia, ROW_NUMBER() OVER(ORDER BY Asia) AS id
+    FROM As1
+    WHERE Asia IS NOT NULL
+    ORDER BY Asia
+),
+Eu1 AS (
+    SELECT
+        CASE
+            WHEN continent = 'Europe' THEN name
+        END AS Europe
+    FROM Student
+),
+Eu2 AS (
+    SELECT Europe, ROW_NUMBER() OVER(ORDER BY Europe) AS id
+    FROM Eu1
+    WHERE Europe IS NOT NULL
+    ORDER BY Europe
+)
+SELECT America, Asia, Europe
+FROM CTE
+LEFT JOIN Am2 USING(id)
+LEFT JOIN As2 USING(id)
+LEFT JOIN Eu2 USING(id)
+WHERE America IS NOT NULL
+    OR Asia IS NOT NULL
+    OR Europe IS NOT NULL;
+
+
+Drop table if exists Student;
+
+
+
 
 
