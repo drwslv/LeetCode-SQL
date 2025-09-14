@@ -29,3 +29,27 @@ LEFT JOIN Address
     USING(personId);
 
 
+/* 176. Second Highest Salary [M]
+Write a solution to find the second highest distinct salary from the Employee table.
+If there is no second highest salary, return null (return None in Pandas).
+*/
+
+Drop table if exists Employee;
+Create table If Not Exists Employee (id int, salary int);
+Truncate table Employee;
+insert into Employee (id, salary) values ('1', '100');
+insert into Employee (id, salary) values ('2', '200');
+insert into Employee (id, salary) values ('3', '300');
+
+SELECT *
+FROM Employee;
+
+SELECT (
+    SELECT DISTINCT salary
+    FROM Employee
+    ORDER BY salary DESC
+    LIMIT 1 OFFSET 1
+) AS SecondHighestSalary;
+
+
+
