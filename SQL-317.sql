@@ -94,5 +94,50 @@ ON E.managerId = M.id
 WHERE E.salary > M.salary;
 
 
+/* 570. Managers with at Least 5 Direct Reports [M]
+Write a solution to find managers with at least five direct reports.
+Return the result table in any order.
+*/
 
+Drop table if exists Employee;
+Create table If Not Exists Employee (id int, name varchar(255), department varchar(255), managerId int);
+Truncate table Employee;
+insert into Employee (id, name, department, managerId) values ('101', 'John', 'A', NULL);
+insert into Employee (id, name, department, managerId) values ('102', 'Dan', 'A', '101');
+insert into Employee (id, name, department, managerId) values ('103', 'James', 'A', '101');
+insert into Employee (id, name, department, managerId) values ('104', 'Amy', 'A', '101');
+insert into Employee (id, name, department, managerId) values ('105', 'Anne', 'A', '101');
+insert into Employee (id, name, department, managerId) values ('106', 'Ron', 'B', '101');
 
+SELECT *
+FROM Employee;
+
+-- Incorrect
+SELECT E.name
+FROM Employee E
+JOIN
+(
+    SELECT managerId, COUNT(*) AS managerCnt
+    FROM Employee
+    GROUP BY managerId
+    HAVING managerId IS NOT NULL
+        AND COUNT(*) > 5
+) AS M
+ON E.id = M.managerId
+
+-- Correct
+WITH Grp AS (
+    SELECT managerId, COUNT(*) AS managerCnt
+    FROM Employee
+    GROUP BY managerId
+),
+Grp2 AS (
+    SELECT *
+    FROM Grp
+    WHERE managerId IS NOT NULL
+        AND managerCnt >= 5
+)
+SELECT E.name
+FROM Grp2
+JOIN Employee E
+    ON Grp2.managerId = E.id;
