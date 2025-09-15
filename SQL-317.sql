@@ -52,7 +52,6 @@ SELECT (
 ) AS SecondHighestSalary;
 
 
-
 /* 1757. Recyclable and Low Fat Products [E]
 Write a solution to find the ids of products that are both low fat and recyclable.
 Return the result table in any order.
@@ -71,6 +70,28 @@ SELECT product_id
 FROM Products
 WHERE low_fats = 'Y' AND recyclable = 'Y';
 
+
+/* 181. Employees Earning More Than Their Managers [E]
+Write a solution to find the employees who earn more than their managers.
+Return the result table in any order.
+*/
+
+Drop table if exists Employee;
+Create table If Not Exists Employee (id int, name varchar(255), salary int, managerId int);
+Truncate table Employee;
+insert into Employee (id, name, salary, managerId) values ('1', 'Joe', '70000', '3');
+insert into Employee (id, name, salary, managerId) values ('2', 'Henry', '80000', '4');
+insert into Employee (id, name, salary, managerId) values ('3', 'Sam', '60000', NULL);
+insert into Employee (id, name, salary, managerId) values ('4', 'Max', '90000', NULL);
+
+SELECT *
+FROM Employee;
+
+SELECT E.name as Employee
+FROM Employee E
+JOIN Employee M
+ON E.managerId = M.id
+WHERE E.salary > M.salary;
 
 
 
