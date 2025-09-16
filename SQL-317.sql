@@ -296,5 +296,25 @@ GROUP BY email
 HAVING COUNT(*) > 1;
 
 
+/* 584. Find Customer Referee [E]
+Find the names of the customer that are either:
+-referred by any customer with id != 2.
+-not referred by any customer.
+Return the result table in any order.
+*/
 
+Drop table if exists Customer;
+Create table If Not Exists Customer (id int, name varchar(25), referee_id int);
+Truncate table Customer;
+insert into Customer (id, name, referee_id) values ('1', 'Will', NULL);
+insert into Customer (id, name, referee_id) values ('2', 'Jane', NULL);
+insert into Customer (id, name, referee_id) values ('3', 'Alex', '2');
+insert into Customer (id, name, referee_id) values ('4', 'Bill', NULL);
+insert into Customer (id, name, referee_id) values ('5', 'Zack', '1');
+insert into Customer (id, name, referee_id) values ('6', 'Mark', '2');
+
+SELECT name
+FROM Customer
+WHERE referee_id != 2
+    OR referee_id IS NULL;
 
