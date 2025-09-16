@@ -167,3 +167,34 @@ LEFT JOIN Weather WY
 WHERE WT.temperature > WY.temperature;
 
 
+/* 177. Nth Highest Salary [M]
+Write a solution to find the nth highest distinct salary from the Employee table. If there are less than n distinct salaries, return null.
+*/
+
+Drop table if exists Employee;
+Create table If Not Exists Employee (Id int, Salary int);
+Truncate table Employee;
+insert into Employee (id, salary) values ('1', '100');
+insert into Employee (id, salary) values ('2', '200');
+insert into Employee (id, salary) values ('3', '300');
+
+SELECT *
+FROM Employee;
+
+CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
+DETERMINISTIC
+BEGIN
+DECLARE M INT; 
+    SET M = N-1;
+  RETURN (
+      SELECT DISTINCT salary
+      FROM Employee
+      ORDER BY salary DESC
+      LIMIT M, 1 -- LIMIT 1, OFFSET M
+  );
+END
+
+SELECT getNthHighestSalary(2);
+
+
+
