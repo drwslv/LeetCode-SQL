@@ -197,4 +197,31 @@ END
 SELECT getNthHighestSalary(2);
 
 
+/* 180. Consecutive Numbers [M]
+Find all numbers that appear at least three times consecutively.
+Return the result table in any order.
+*/
+
+Drop table if exists Logs;
+Create table If Not Exists Logs (id int, num int);
+Truncate table Logs;
+insert into Logs (id, num) values ('1', '1');
+insert into Logs (id, num) values ('2', '1');
+insert into Logs (id, num) values ('3', '1');
+insert into Logs (id, num) values ('4', '2');
+insert into Logs (id, num) values ('5', '1');
+insert into Logs (id, num) values ('6', '2');
+insert into Logs (id, num) values ('7', '2');
+
+WITH CTE AS (
+    SELECT *, LAG(num, 1) OVER(ORDER BY id) - num AS l1, LAG(num, 2) OVER(ORDER BY id) - num AS l2
+    FROM Logs
+)
+SELECT DISTINCT num AS ConsecutiveNums
+FROM CTE
+WHERE l1 = 0 AND l2 = 0;
+
+
+
+
 
