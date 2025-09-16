@@ -356,3 +356,32 @@ WHERE A1.activity_type = 'start'
 GROUP BY A1.machine_id;
 
 
+/* 626. Exchange Seats [M]
+Write a solution to swap the seat id of every two consecutive students. If the number of students is odd, the id of the last student is not swapped.
+Return the result table ordered by id in ascending order.
+*/
+
+Drop table if exists Seat;
+Create table If Not Exists Seat (id int, student varchar(255));
+Truncate table Seat;
+insert into Seat (id, student) values ('1', 'Abbot');
+insert into Seat (id, student) values ('2', 'Doris');
+insert into Seat (id, student) values ('3', 'Emerson');
+insert into Seat (id, student) values ('4', 'Green');
+insert into Seat (id, student) values ('5', 'Jeames');
+
+WITH CTE AS(
+    SELECT id AS id_old, student, id%2 AS odd, LEAD(id) OVER(ORDER BY id) AS id_if_odd, LAG(id) OVER(ORDER BY id) AS id_if_even
+    FROM Seat
+)
+SELECT 
+    CASE
+        WHEN odd = 1 THEN IFNULL(id_if_odd,id_old)
+        WHEN odd = 0 THEN id_if_even
+    END AS id,
+    student
+FROM CTE
+ORDER BY id ASC;
+
+
+
