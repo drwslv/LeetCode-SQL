@@ -41,9 +41,6 @@ insert into Employee (id, salary) values ('1', '100');
 insert into Employee (id, salary) values ('2', '200');
 insert into Employee (id, salary) values ('3', '300');
 
-SELECT *
-FROM Employee;
-
 SELECT (
     SELECT DISTINCT salary
     FROM Employee
@@ -84,9 +81,6 @@ insert into Employee (id, name, salary, managerId) values ('2', 'Henry', '80000'
 insert into Employee (id, name, salary, managerId) values ('3', 'Sam', '60000', NULL);
 insert into Employee (id, name, salary, managerId) values ('4', 'Max', '90000', NULL);
 
-SELECT *
-FROM Employee;
-
 SELECT E.name as Employee
 FROM Employee E
 JOIN Employee M
@@ -108,9 +102,6 @@ insert into Employee (id, name, department, managerId) values ('103', 'James', '
 insert into Employee (id, name, department, managerId) values ('104', 'Amy', 'A', '101');
 insert into Employee (id, name, department, managerId) values ('105', 'Anne', 'A', '101');
 insert into Employee (id, name, department, managerId) values ('106', 'Ron', 'B', '101');
-
-SELECT *
-FROM Employee;
 
 -- Incorrect
 SELECT E.name
@@ -177,9 +168,6 @@ Truncate table Employee;
 insert into Employee (id, salary) values ('1', '100');
 insert into Employee (id, salary) values ('2', '200');
 insert into Employee (id, salary) values ('3', '300');
-
-SELECT *
-FROM Employee;
 
 CREATE FUNCTION getNthHighestSalary(N INT) RETURNS INT
 DETERMINISTIC
@@ -258,9 +246,6 @@ insert into Transactions (id, country, state, amount, trans_date) values ('122',
 insert into Transactions (id, country, state, amount, trans_date) values ('123', 'US', 'approved', '2000', '2019-01-01');
 insert into Transactions (id, country, state, amount, trans_date) values ('124', 'DE', 'approved', '2000', '2019-01-07');
 
-SELECT *
-FROM Transactions;
-
 WITH CTE AS (
     SELECT *, DATE_FORMAT(trans_date, '%Y-%m') AS month
     FROM Transactions
@@ -292,6 +277,23 @@ FROM World
 WHERE area >= 3000000
     OR population >= 25000000;
 
+
+/* 182. Duplicate Emails [E]
+Write a solution to report all the duplicate emails. Note that it's guaranteed that the email field is not NULL.
+Return the result table in any order.
+*/
+
+Drop table if exists Person;
+Create table If Not Exists Person (id int, email varchar(255));
+Truncate table Person;
+insert into Person (id, email) values ('1', 'a@b.com');
+insert into Person (id, email) values ('2', 'c@d.com');
+insert into Person (id, email) values ('3', 'a@b.com');
+
+SELECT email
+FROM Person
+GROUP BY email
+HAVING COUNT(*) > 1;
 
 
 
