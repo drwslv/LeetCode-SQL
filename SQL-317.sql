@@ -421,3 +421,28 @@ FROM (
 GROUP BY customer_id;
 
 
+/* 196. Delete Duplicate Emails [E]
+Write a solution to delete all duplicate emails, keeping only one unique email with the smallest id.
+For SQL users, please note that you are supposed to write a DELETE statement and not a SELECT one.
+For Pandas users, please note that you are supposed to modify Person in place.
+After running your script, the answer shown is the Person table. The driver will first
+compile and run your piece of code and then show the Person table. The final order of the Person table does not matter.
+*/
+
+Drop table if exists Person;
+Create table If Not Exists Person (Id int, Email varchar(255));
+Truncate table Person;
+insert into Person (id, email) values ('1', 'john@example.com');
+insert into Person (id, email) values ('2', 'bob@example.com');
+insert into Person (id, email) values ('3', 'john@example.com');
+
+SELECT *
+FROM Person;
+
+DELETE P1
+FROM Person P1
+JOIN Person P2
+    ON P1.Email = P2.Email
+    AND P1.Id > P2.Id;
+
+
