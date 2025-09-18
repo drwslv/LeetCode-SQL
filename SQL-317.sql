@@ -507,3 +507,35 @@ LEFT JOIN (
 USING(user_id);
 
 
+/* 1789. Primary Department for Each Employee [E]
+Employees can belong to multiple departments. When the employee joins other departments,
+they need to decide which department is their primary department. Note that when an employee
+belongs to only one department, their primary column is 'N'.
+Write a solution to report all the employees with their primary department.
+For employees who belong to one department, report their only department.
+Return the result table in any order.
+*/
+
+Drop table if exists Employee;
+Create table If Not Exists Employee (employee_id int, department_id int, primary_flag ENUM('Y','N'));
+Truncate table Employee;
+insert into Employee (employee_id, department_id, primary_flag) values ('1', '1', 'N');
+insert into Employee (employee_id, department_id, primary_flag) values ('2', '1', 'Y');
+insert into Employee (employee_id, department_id, primary_flag) values ('2', '2', 'N');
+insert into Employee (employee_id, department_id, primary_flag) values ('3', '3', 'N');
+insert into Employee (employee_id, department_id, primary_flag) values ('4', '2', 'N');
+insert into Employee (employee_id, department_id, primary_flag) values ('4', '3', 'Y');
+insert into Employee (employee_id, department_id, primary_flag) values ('4', '4', 'N');
+
+SELECT E1.employee_id, E1.department_id
+FROM Employee E1
+LEFT JOIN (
+    SELECT employee_id, COUNT(*) as num_dept
+    FROM Employee
+    GROUP BY employee_id
+) E2
+    USING(employee_id)
+WHERE E1.primary_flag = 'Y'
+    OR E2.num_dept = 1;
+
+
