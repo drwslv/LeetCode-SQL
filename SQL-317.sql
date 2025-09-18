@@ -578,3 +578,46 @@ JOIN High H
     AND E.departmentId = H.departmentId;
 
 
+/* 1164. Product Price at a Given Date [M]
+Initially, all products have price 10.
+Write a solution to find the prices of all products on the date 2019-08-16.
+Return the result table in any order.
+*/
+
+Drop table if exists Products;
+Create table If Not Exists Products (product_id int, new_price int, change_date date);
+Truncate table Products;
+insert into Products (product_id, new_price, change_date) values ('1', '20', '2019-08-14');
+insert into Products (product_id, new_price, change_date) values ('2', '50', '2019-08-14');
+insert into Products (product_id, new_price, change_date) values ('1', '30', '2019-08-15');
+insert into Products (product_id, new_price, change_date) values ('1', '35', '2019-08-16');
+insert into Products (product_id, new_price, change_date) values ('2', '65', '2019-08-17');
+insert into Products (product_id, new_price, change_date) values ('3', '20', '2019-08-18');
+
+WITH CTE1 AS (
+    SELECT *
+    FROM Products
+    WHERE change_date <= '2019-08-16'
+), CTE2 AS (
+    SELECT product_id, MAX(change_date) AS change_date
+    FROM CTE1
+    GROUP BY product_id
+), CTE3 AS (
+    SELECT *
+    FROM CTE2
+    JOIN Products
+    USING(product_id, change_date)
+)
+SELECT product_id, IFNULL(new_price,10) AS price
+FROM CTE3
+RIGHT JOIN (
+    SELECT DISTINCT product_id
+    FROM Products
+) J
+USING(product_id);
+
+
+
+
+
+
