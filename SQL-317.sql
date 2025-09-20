@@ -656,3 +656,20 @@ SELECT ROUND(AVG(present),2) AS fraction
 FROM GRP;
 
 
+/* 610. Triangle Judgement [E]
+Report for every three line segments whether they can form a triangle.
+Return the result table in any order.
+*/
+
+Drop table if exists Triangle;
+Create table If Not Exists Triangle (x int, y int, z int);
+Truncate table Triangle;
+insert into Triangle (x, y, z) values ('13', '15', '30');
+insert into Triangle (x, y, z) values ('10', '20', '15');
+
+-- max < sum - max, 2 max < sum, 0 < sum - 2 max
+SELECT *, IF(x + y + z - 2 * GREATEST(x, y, z) > 0, 'Yes', 'No') AS triangle
+FROM Triangle;
+
+
+
