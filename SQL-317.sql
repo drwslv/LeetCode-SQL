@@ -617,7 +617,42 @@ RIGHT JOIN (
 USING(product_id);
 
 
+/* 550. Game Play Analysis IV [M]
+Write a solution to report the fraction of players that logged in again on the day after the day they first logged in,
+rounded to 2 decimal places. In other words, you need to determine the number of players who logged in on the day
+immediately following their initial login, and divide it by the number of total players.
+*/
 
+Drop table if exists Activity;
+Create table If Not Exists Activity (player_id int, device_id int, event_date date, games_played int);
+Truncate table Activity;
+insert into Activity (player_id, device_id, event_date, games_played) values ('1', '2', '2016-03-01', '5');
+insert into Activity (player_id, device_id, event_date, games_played) values ('1', '2', '2016-03-02', '6');
+insert into Activity (player_id, device_id, event_date, games_played) values ('2', '3', '2017-06-25', '1');
+insert into Activity (player_id, device_id, event_date, games_played) values ('3', '1', '2016-03-02', '0');
+insert into Activity (player_id, device_id, event_date, games_played) values ('3', '4', '2018-07-03', '5');
 
+SELECT *
+FROM Activity;
+
+WITH FL AS (
+    SELECT player_id, MIN(event_date) AS event_date
+    FROM  Activity
+    GROUP BY player_id
+),
+NL AS (
+    SELECT player_id, DATE_ADD(event_date, INTERVAL 1 DAY) AS next_date, 1 AS present
+    FROM FL
+),
+GRP AS (
+    SELECT A.player_id, IFNULL(MAX(present),0) AS present
+    FROM Activity A
+    LEFT JOIN NL
+        ON A.player_id = NL.player_id
+        AND A.event_date = NL.next_date
+    GROUP BY A.player_id
+)
+SELECT ROUND(AVG(present),2) AS fraction
+FROM GRP;
 
 
