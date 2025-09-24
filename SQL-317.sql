@@ -774,3 +774,31 @@ FROM StEx S
 LEFT JOIN Grp G USING(student_id, subject_name, student_id)
 ORDER BY student_id, subject_name;
 
+
+/* 183. Customers Who Never Order [E]
+Write a solution to find all customers who never order anything.
+Return the result table in any order.
+*/
+
+Drop table if exists Customes;
+Drop table if exists Orders;
+Create table If Not Exists Customers (id int, name varchar(255));
+Create table If Not Exists Orders (id int, customerId int);
+Truncate table Customers;
+insert into Customers (id, name) values ('1', 'Joe');
+insert into Customers (id, name) values ('2', 'Henry');
+insert into Customers (id, name) values ('3', 'Sam');
+insert into Customers (id, name) values ('4', 'Max');
+Truncate table Orders;
+insert into Orders (id, customerId) values ('1', '3');
+insert into Orders (id, customerId) values ('2', '1');
+
+SELECT name as Customers
+FROM Customers
+WHERE id NOT IN (
+    SELECT customerId
+    FROM Orders
+);
+
+
+
