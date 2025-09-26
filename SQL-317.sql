@@ -948,4 +948,54 @@ LEFT JOIN EmployeeUNI U
     USING(id);
 
 
+/* 1045. Customers Who Bought All Products [M]
+Write a solution to report the customer ids from the Customer table that bought all the products in the Product table.
+Return the result table in any order.
+*/
+
+Drop table if exists Customer;
+Drop table if exists Product;
+Create table If Not Exists Customer (customer_id int, product_key int);
+Create table Product (product_key int);
+Truncate table Customer;
+insert into Customer (customer_id, product_key) values ('1', '5');
+insert into Customer (customer_id, product_key) values ('2', '6');
+insert into Customer (customer_id, product_key) values ('3', '5');
+insert into Customer (customer_id, product_key) values ('3', '6');
+insert into Customer (customer_id, product_key) values ('1', '6');
+Truncate table Product;
+insert into Product (product_key) values ('5');
+insert into Product (product_key) values ('6');
+
+SELECT *
+FROM Customer;
+
+SELECT *
+FROM Product;
+
+WITH CTE1 AS (
+    SELECT DISTINCT C.customer_id, P.product_key
+    FROM Customer C
+    CROSS JOIN Product P
+),
+CTE2 AS (
+    SELECT *, 1 AS present
+    FROM Customer
+),
+CTE3 AS (
+    SELECT C1.customer_id, C1.product_key
+    FROM CTE1 C1
+    LEFT JOIN CTE2 C2
+        ON C1.customer_id = C2.customer_id
+        AND C1.product_key = C2.product_key
+    WHERE C2.present IS NULL
+)
+SELECT DISTINCT customer_id
+FROM Customer
+WHERE customer_id NOT IN
+    (
+        SELECT customer_id
+        FROM CTE3
+    );
+
 
